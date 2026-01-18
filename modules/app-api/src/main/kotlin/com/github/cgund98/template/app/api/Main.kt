@@ -1,4 +1,4 @@
-package com.github.cgund98.kotlinktorpostgrestemplate.app.api
+package com.github.cgund98.template.app.api
 
 import io.ktor.server.application.Application
 import io.ktor.server.engine.embeddedServer

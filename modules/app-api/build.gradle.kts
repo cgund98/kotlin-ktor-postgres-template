@@ -12,5 +12,5 @@ dependencies {
 }
 
 application {
-    mainClass.set("com.github.cgund98.kotlinktorpostgrestemplate.app.api.MainKt")
+    mainClass.set("com.github.cgund98.template.app.api.MainKt")
 }
