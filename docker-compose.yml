@@ -1,0 +1,23 @@
+services:
+  workspace:
+    image: kotlin-ktor-postgres-template
+    build:
+      context: .
+      dockerfile: ./resources/docker/workspace.Dockerfile
+    environment:
+      - IO_KTOR_DEVELOPMENT=true
+    volumes:
+      - .:/workspace
+      - gradle_cache:/cache/gradle      # Mount the named volume
+    command: sleep infinity
+    ports:
+      - 8000:8000
+
+  postgres:
+    image: postgres:16
+    volumes:
+        - postgres_data:/var/lib/postgresql/data
+
+volumes:
+    gradle_cache:  # Define the named volume here
+    postgres_data:

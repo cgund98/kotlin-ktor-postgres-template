@@ -1,0 +1,20 @@
+{
+  "name": "Kotlin Dev Env",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "workspace",
+  "workspaceFolder": "/workspace",
+  "forwardPorts": [8000],
+  "customizations": {
+    "jetbrains": {
+      "backend": "IntelliJ",
+      "plugins": [
+        "org.jetbrains.kotlin",
+        "com.google.gct.core"
+      ]
+    },
+    "vscode": {
+      "extensions": ["fwcd.kotlin", "vscjava.vscode-gradle"]
+    }
+  },
+  "remoteUser": "vscode"
+}
