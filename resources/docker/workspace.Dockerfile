@@ -8,9 +8,12 @@ RUN apt-get update && apt-get install -y \
     unzip \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Create a non-root user (Standard practice for 2026)
+# 2. Install yamlfmt
+RUN curl -L https://github.com/google/yamlfmt/releases/download/v0.21.0/yamlfmt_0.21.0_Linux_x86_64.tar.gz | tar xz -C /usr/local/bin yamlfmt
+
+# 3. Create a non-root user (Standard practice for 2026)
 # This prevents 'root' from owning your local files when you mount volumes
-ARG USERNAME=kotlin-dev
+ARG USERNAME=workspace
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
@@ -24,10 +27,10 @@ RUN groupadd --gid $USER_GID $USERNAME \
 USER $USERNAME
 WORKDIR /workspace
 
-# 3. Pre-warm Gradle (Optional but recommended)
+# 4. Pre-warm Gradle (Optional but recommended)
 # This downloads Gradle so your first 'make lint' is instant
-COPY --chown=kotlin-dev:kotlin-dev gradlew .
-COPY --chown=kotlin-dev:kotlin-dev gradle gradle
+COPY --chown=workspace:workspace gradlew .
+COPY --chown=workspace:workspace gradle gradle
 RUN ./gradlew --version
 
 # Keep the container running for 'docker exec'

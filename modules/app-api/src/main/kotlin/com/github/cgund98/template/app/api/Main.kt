@@ -1,11 +1,21 @@
 package com.github.cgund98.template.app.api
 
+import com.github.cgund98.template.core.config.AppConfig
+import com.github.cgund98.template.infrastructure.infrastructureModule
+import com.github.cgund98.template.presentation.user.userModule
+import com.github.cgund98.template.presentation.user.userRoutes
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
+import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.requestvalidation.RequestValidation
+import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
+import org.koin.ktor.plugin.Koin
 
 fun main() {
     println("Starting the Monolith...")
@@ -16,19 +26,35 @@ fun main() {
         Netty,
         port = 8000,
         watchPaths = listOf("classes"),
-        // Pass the function reference here instead of using { }
         module = Application::module,
     ).start(wait = true)
 }
 
 // Ensure this is a top-level function or a visible extension
 suspend fun Application.module() {
+    install(Koin) {
+        modules(
+            infrastructureModule,
+            userModule,
+        )
+    }
+
+    install(RequestValidation)
+
+    install(ContentNegotiation) {
+        json()
+    }
+
     routing {
+        swaggerUI(path = "docs", swaggerFile = AppConfig.data.api.openApiPath)
+
         get("/") {
             call.respondText("Hello from Kotlin Monolith! (Verified)")
         }
-        get("/healthy") {
+        get("/health") {
             call.respondText("Healthy")
         }
+
+        userRoutes()
     }
 }

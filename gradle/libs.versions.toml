@@ -4,19 +4,53 @@
 [versions]
 kotlin-gradle-plugin = "2.2.21"
 ktor = "3.3.3"
+exposed = "1.0.0-rc-3"
+koin-bom = "4.1.1"
+postgresql = "42.7.4"
+
+detekt = "1.23.6"
+ktlint = "12.1.1"
+
 
 [libraries]
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin-gradle-plugin" }
 
-# Core Ktor Server
+# Ktor Server
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
-# Netty Engine (The equivalent of FastAPI's Uvicorn)
 ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor" }
-# Serialization (The equivalent of Pydantic for JSON handling)
 ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-server-request-validation = { module = "io.ktor:ktor-server-request-validation", version.ref = "ktor" }
+ktor-server-swagger = { module = "io.ktor:ktor-server-swagger", version.ref = "ktor" }
+
 # Logging
 logback-classic = { module = "ch.qos.logback:logback-classic", version = "1.5.12" }
+
+# Exposed - database interactions
+exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
+exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
+exposed-datetime = { module = "org.jetbrains.exposed:exposed-kotlin-datetime", version.ref = "exposed" }
+
+# Koin
+koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
+koin-core = { module = "io.insert-koin:koin-core" }
+koin-ktor = { module = "io.insert-koin:koin-ktor" }
+koin-test = { module = "io.insert-koin:koin-test" }
+
+# Configuration
+dotenv-kotlin = { module = "io.github.cdimascio:dotenv-kotlin", version = "6.4.1" }
+
+# Postgres
+postgresql-driver = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+
+# Linters
+plugin-detekt = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
+plugin-ktlint = { module = "org.jlleitschuh.gradle:ktlint-gradle", version.ref = "ktlint" }
+
+[plugins]
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
+
 
 [bundles]
 # Group them so you only have to add one line to your build file
@@ -25,5 +59,18 @@ ktor-server = [
     "ktor-server-netty",
     "ktor-server-content-negotiation",
     "ktor-serialization-kotlinx-json",
-    "logback-classic"
+    "ktor-server-request-validation",
+    "ktor-server-swagger",
+]
+
+exposed = [
+    "exposed-core",
+    "exposed-jdbc",
+    "exposed-datetime"
+]
+
+koin = [
+    "koin-bom",
+    "koin-core",
+    "koin-ktor",
 ]

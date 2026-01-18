@@ -42,3 +42,6 @@ out/
 
 # --- Kotlin Specific ---
 .kotlin/
+
+# --- Generated OpenAPI schema
+openapi.json

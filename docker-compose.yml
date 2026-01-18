@@ -8,16 +8,41 @@ services:
       - IO_KTOR_DEVELOPMENT=true
     volumes:
       - .:/workspace
-      - gradle_cache:/cache/gradle      # Mount the named volume
+      - gradle_cache:/cache/gradle # Mount the named volume
     command: sleep infinity
     ports:
       - 8000:8000
-
   postgres:
     image: postgres:16
+    container_name: kotlin-ktor-postgres-template-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app
+    ports:
+      - "5432:5432"
     volumes:
-        - postgres_data:/var/lib/postgresql/data
-
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  migrate:
+    build:
+      context: .
+      dockerfile: resources/docker/migrate.Dockerfile
+    image: app-migrations:latest
+    container_name: kotlin-ktor-postgres-template-migrate
+    command: ["-path", "/migrations", "-database", "postgres://postgres:postgres@postgres:5432/app?sslmode=disable", "up"]
+    volumes:
+      # Mount migrations for local development (overrides image migrations)
+      - ./resources/db/migrations:/migrations
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - migrate
 volumes:
-    gradle_cache:  # Define the named volume here
-    postgres_data:
+  gradle_cache: # Define the named volume here
+  postgres_data:
