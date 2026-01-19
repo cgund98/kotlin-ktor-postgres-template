@@ -7,6 +7,7 @@ plugins {
 
 dependencies {
     implementation(libs.bundles.ktor.server)
+    implementation(libs.bundles.logging)
     implementation(libs.ktor.serialization.kotlinx.json)
 
     // Core OpenAPI support

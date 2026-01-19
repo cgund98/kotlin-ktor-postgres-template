@@ -7,7 +7,7 @@ const val DEV_OPENAPI_PATH = "openapi.json"
 object AppConfig {
     private val vars: MutableMap<String, String> = HashMap()
 
-    init {
+    fun readEnvFiles() {
         // Load .env and .env.local
         listOf(".env", ".env.local").forEach { filename ->
             val env =
@@ -27,19 +27,28 @@ object AppConfig {
 
             env.entries().forEach {
                 vars[it.key] = it.value
+                System.setProperty(it.key, it.value)
             }
         }
+    }
+
+    init {
+        readEnvFiles()
     }
 
     val data: Settings =
         Settings(
             logLevel = vars["LOG_LEVEL"] ?: "INFO",
-            logFormat = vars["LOG_FORMAT"] ?: "json",
+            logFormat = vars["LOG_FORMAT"] ?: "JSON",
             postgres =
                 PostgresSettings(
                     url = vars["POSTGRES_URL"] ?: "",
                     user = vars["POSTGRES_USER"] ?: "",
                     password = vars["POSTGRES_PASSWORD"] ?: "",
+                    maxPoolSize = vars["POSTGRES_MAX_POOL_SIZE"]?.toInt() ?: 25,
+                    connectionTimeout = vars["POSTGRES_CONNECTION_TIMEOUT"]?.toLong() ?: 30000,
+                    leakDetectionThreshold =
+                        vars["POSTGRES_LEAK_DETECTION_THRESHOLD"]?.toLong() ?: 2000,
                 ),
             api =
                 ApiSettings(
@@ -60,6 +69,9 @@ data class PostgresSettings(
     val url: String,
     val user: String,
     val password: String,
+    val maxPoolSize: Int,
+    val connectionTimeout: Long,
+    val leakDetectionThreshold: Long,
 )
 
 data class ApiSettings(

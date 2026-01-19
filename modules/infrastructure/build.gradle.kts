@@ -8,7 +8,7 @@ dependencies {
 
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.core)
-    implementation(libs.postgresql.driver)
+    implementation(libs.bundles.postgres)
 
     implementation(project(":modules:core"))
 

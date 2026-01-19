@@ -11,13 +11,15 @@ class UserService(
     private val txManager: TransactionManager,
     private val userRepository: UserRepository,
 ) {
+    private val userValidator = UserValidator(userRepository)
+
     suspend fun createUser(
         email: String,
         name: String,
         age: Int? = null,
     ): User =
         txManager.withTransaction {
-            userRepository.validateCreateUser(email, name, age)
+            userValidator.validateCreateUser(email, name, age)
 
             val params = CreateUserParams(email = email, name = name, age = age)
             val entity = userRepository.create(params)
@@ -32,7 +34,7 @@ class UserService(
         age: Int?,
     ): User =
         txManager.withTransaction {
-            userRepository.validateUpdateUser(id, email, name, age)
+            userValidator.validateUpdateUser(id, email, name, age)
 
             val params = UpdateUserParams(id = id, email = email, name = name, age = age)
             val entity = userRepository.update(params)
@@ -55,7 +57,7 @@ class UserService(
 
     suspend fun deleteUser(id: UUID): Boolean =
         txManager.withTransaction {
-            userRepository.validateDeleteUser(id)
+            userValidator.validateDeleteUser(id)
 
             userRepository.delete(id)
         }

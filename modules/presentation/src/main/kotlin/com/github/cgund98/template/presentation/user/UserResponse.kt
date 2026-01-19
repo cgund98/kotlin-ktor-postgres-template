@@ -34,3 +34,8 @@ data class ListUsersResponse(
     val users: List<UserResponse>,
     val pagination: PaginationMetadata,
 )
+
+@Serializable
+data class DeleteUserResponse(
+    val success: Boolean,
+)

@@ -46,7 +46,7 @@ private fun ResultRow.toUserEntity() =
     )
 
 class ExposedUserRepository : UserRepository {
-    override suspend fun create(params: CreateUserParams): UserEntity {
+    override fun create(params: CreateUserParams): UserEntity {
         val userId =
             UsersTable.insert {
                 it[email] = params.email
@@ -58,14 +58,14 @@ class ExposedUserRepository : UserRepository {
             ?: throw NotFoundException("User", userId.toString())
     }
 
-    override suspend fun findById(id: UUID): UserEntity? =
+    override fun findById(id: UUID): UserEntity? =
         UsersTable
             .selectAll()
             .where(UsersTable.id eq id)
             .firstOrNull()
             ?.toUserEntity()
 
-    override suspend fun findByEmail(email: String): UserEntity? =
+    override fun findByEmail(email: String): UserEntity? =
         UsersTable
             .selectAll()
             .where(UsersTable.email eq email)
@@ -73,7 +73,7 @@ class ExposedUserRepository : UserRepository {
             ?.toUserEntity()
 
     @OptIn(ExperimentalTime::class)
-    override suspend fun update(params: UpdateUserParams): UserEntity {
+    override fun update(params: UpdateUserParams): UserEntity {
         UsersTable.update({ UsersTable.id eq params.id }) {
             params.email?.let { newEmail -> it[email] = newEmail }
             params.name?.let { newName -> it[name] = newName }
@@ -85,12 +85,12 @@ class ExposedUserRepository : UserRepository {
             ?: throw NotFoundException("User", params.id.toString())
     }
 
-    override suspend fun delete(id: UUID): Boolean {
+    override fun delete(id: UUID): Boolean {
         UsersTable.deleteWhere { UsersTable.id eq id }
         return findById(id) == null
     }
 
-    override suspend fun count(filter: UserFilter): Long {
+    override fun count(filter: UserFilter): Long {
         val query =
             UsersTable.select(UsersTable.id.count())
 
@@ -99,16 +99,16 @@ class ExposedUserRepository : UserRepository {
         return query.first()[UsersTable.id.count()]
     }
 
-    override suspend fun list(
+    override fun list(
         limit: Int,
         offset: Long,
         filter: UserFilter,
     ): List<UserEntity> {
         val query =
-            UsersTable.selectAll().limit(limit).offset(offset)
+            UsersTable.selectAll()
 
         filter.email?.let { email -> query.andWhere { UsersTable.email eq email } }
 
-        return query.map { it.toUserEntity() }
+        return query.limit(limit).offset(offset).map { it.toUserEntity() }
     }
 }

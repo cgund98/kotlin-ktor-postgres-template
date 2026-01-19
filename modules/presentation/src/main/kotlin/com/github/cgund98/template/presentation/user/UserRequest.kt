@@ -1,8 +1,6 @@
 package com.github.cgund98.template.presentation.user
 
-import com.github.cgund98.template.presentation.UUIDSerializer
 import kotlinx.serialization.Serializable
-import java.util.UUID
 
 @Serializable
 data class UserCreateRequest(
@@ -13,9 +11,7 @@ data class UserCreateRequest(
 
 @Serializable
 data class UserUpdateRequest(
-    @Serializable(with = UUIDSerializer::class)
-    val id: UUID,
-    val email: String?,
-    val name: String?,
-    val age: Int?,
+    val email: String? = null,
+    val name: String? = null,
+    val age: Int? = null,
 )

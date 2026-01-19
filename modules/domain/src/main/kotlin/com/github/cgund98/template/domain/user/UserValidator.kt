@@ -49,50 +49,54 @@ fun validateEmail(email: String?) {
 /**
  * Extensions to UserRepository
  */
-suspend fun UserRepository.validateEmailNotDuplicate(
-    email: String?,
-    currentEmail: String,
+class UserValidator(
+    private val userRepository: UserRepository,
 ) {
-    if (email == null || email == currentEmail) return
+    fun validateEmailNotDuplicate(
+        email: String?,
+        currentEmail: String,
+    ) {
+        if (email == null || email == currentEmail) return
 
-    // Since this is an extension function on UserRepository,
-    // we can call 'findByEmail' directly.
-    val existing = findByEmail(email)
-    if (existing != null) {
-        throw DuplicateException("User", "email", email)
+        // Since this is an extension function on UserRepository,
+        // we can call 'findByEmail' directly.
+        val existing = userRepository.findByEmail(email)
+        if (existing != null) {
+            throw DuplicateException("User", "email", email)
+        }
     }
-}
 
-/**
- * Higher level compositions
- */
+    /**
+     * Higher level compositions
+     */
 
-suspend fun UserRepository.validateCreateUser(
-    email: String,
-    name: String,
-    age: Int?,
-) {
-    validateEmail(email)
-    validateName(name)
-    validateAge(age)
-    validateEmailNotDuplicate(email, currentEmail = "")
-}
+    fun validateCreateUser(
+        email: String,
+        name: String,
+        age: Int?,
+    ) {
+        validateEmail(email)
+        validateName(name)
+        validateAge(age)
+        validateEmailNotDuplicate(email, currentEmail = "")
+    }
 
-suspend fun UserRepository.validateUpdateUser(
-    id: UUID,
-    email: String?,
-    name: String?,
-    age: Int?,
-) {
-    validateEmail(email)
-    validateName(name)
-    validateAge(age)
+    fun validateUpdateUser(
+        id: UUID,
+        email: String?,
+        name: String?,
+        age: Int?,
+    ) {
+        validateEmail(email)
+        validateName(name)
+        validateAge(age)
 
-    val user = findById(id) ?: throw NotFoundException("User", id.toString())
+        val user = userRepository.findById(id) ?: throw NotFoundException("User", id.toString())
 
-    validateEmailNotDuplicate(email, currentEmail = user.email)
-}
+        validateEmailNotDuplicate(email, currentEmail = user.email)
+    }
 
-suspend fun UserRepository.validateDeleteUser(id: UUID) {
-    findById(id) ?: throw NotFoundException("User", id.toString())
+    fun validateDeleteUser(id: UUID) {
+        userRepository.findById(id) ?: throw NotFoundException("User", id.toString())
+    }
 }

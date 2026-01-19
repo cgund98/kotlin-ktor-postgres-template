@@ -22,9 +22,12 @@ ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negoti
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-server-request-validation = { module = "io.ktor:ktor-server-request-validation", version.ref = "ktor" }
 ktor-server-swagger = { module = "io.ktor:ktor-server-swagger", version.ref = "ktor" }
+ktor-server-status-pages = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor" }
+ktor-server-call-logging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor" }
 
 # Logging
-logback-classic = { module = "ch.qos.logback:logback-classic", version = "1.5.12" }
+kotlin-logging-jvm = { module = "io.github.oshai:kotlin-logging-jvm", version = "7.0.3" }
+logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "8.0" }
 
 # Exposed - database interactions
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
@@ -42,14 +45,11 @@ dotenv-kotlin = { module = "io.github.cdimascio:dotenv-kotlin", version = "6.4.1
 
 # Postgres
 postgresql-driver = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+hikari = { module = "com.zaxxer:HikariCP", version = "6.2.1" }
 
 # Linters
 plugin-detekt = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 plugin-ktlint = { module = "org.jlleitschuh.gradle:ktlint-gradle", version.ref = "ktlint" }
-
-[plugins]
-detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 
 
 [bundles]
@@ -61,6 +61,8 @@ ktor-server = [
     "ktor-serialization-kotlinx-json",
     "ktor-server-request-validation",
     "ktor-server-swagger",
+    "ktor-server-status-pages",
+    "ktor-server-call-logging"
 ]
 
 exposed = [
@@ -69,8 +71,12 @@ exposed = [
     "exposed-datetime"
 ]
 
-koin = [
-    "koin-bom",
-    "koin-core",
-    "koin-ktor",
+logging = [
+    "kotlin-logging-jvm",
+    "logstash-logback-encoder"
+]
+
+postgres = [
+    "postgresql-driver",
+    "hikari",
 ]
