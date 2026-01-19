@@ -5,11 +5,10 @@ import com.github.cgund98.template.domain.NotFoundException
 import com.github.cgund98.template.domain.ValidationException
 import com.github.cgund98.template.domain.user.repo.UserEntity
 import com.github.cgund98.template.domain.user.repo.UserRepository
-import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runTest
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -18,8 +17,10 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
+@OptIn(ExperimentalTime::class)
 class UserValidatorTest {
     private val userRepository = mockk<UserRepository>()
+    private val userValidator = UserValidator(userRepository)
     private val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
 
     // --- Pure Validation Rules ---
@@ -93,98 +94,103 @@ class UserValidatorTest {
         }
     }
 
-    // --- Repository Extension Tests ---
+    // --- UserValidator Tests ---
 
     @Test
-    fun `validateEmailNotDuplicate should pass if email is null or same as current`() =
-        runTest {
-            assertDoesNotThrow { runBlocking { userRepository.validateEmailNotDuplicate(null, "old@example.com") } }
-            assertDoesNotThrow {
-                runBlocking {
-                    userRepository.validateEmailNotDuplicate(
-                        "old@example.com",
-                        "old@example.com",
-                    )
-                }
+    fun `validateEmailNotDuplicate should pass if email is null or same as current`() {
+        assertDoesNotThrow { userValidator.validateEmailNotDuplicate(null, "old@example.com") }
+        assertDoesNotThrow {
+            userValidator.validateEmailNotDuplicate(
+                "old@example.com",
+                "old@example.com",
+            )
+        }
+    }
+
+    @Test
+    fun `validateEmailNotDuplicate should pass if email is unique`() {
+        val newEmail = "new@example.com"
+        every { userRepository.findByEmail(newEmail) } returns null
+
+        assertDoesNotThrow { userValidator.validateEmailNotDuplicate(newEmail, "old@example.com") }
+    }
+
+    @Test
+    fun `validateEmailNotDuplicate should throw if email exists`() {
+        val newEmail = "existing@example.com"
+        val existingUser = UserEntity(UUID.randomUUID(), newEmail, "Existing", 30, now, now)
+
+        every { userRepository.findByEmail(newEmail) } returns existingUser
+
+        val exception =
+            assertThrows(DuplicateException::class.java) {
+                userValidator.validateEmailNotDuplicate(newEmail, "old@example.com")
             }
-        }
+        assertEquals("User with email: '$newEmail' already exists", exception.message)
+    }
 
     @Test
-    fun `validateEmailNotDuplicate should pass if email is unique`() =
-        runTest {
-            val newEmail = "new@example.com"
-            coEvery { userRepository.findByEmail(newEmail) } returns null
+    fun `validateCreateUser should pass for valid input`() {
+        val email = "new@example.com"
+        every { userRepository.findByEmail(email) } returns null
 
-            assertDoesNotThrow { runBlocking { userRepository.validateEmailNotDuplicate(newEmail, "old@example.com") } }
-        }
-
-    @Test
-    fun `validateEmailNotDuplicate should throw if email exists`() =
-        runTest {
-            val newEmail = "existing@example.com"
-            val existingUser = UserEntity(UUID.randomUUID(), newEmail, "Existing", 30, now, now)
-
-            coEvery { userRepository.findByEmail(newEmail) } returns existingUser
-
-            val exception =
-                assertThrows(DuplicateException::class.java) {
-                    runBlocking { userRepository.validateEmailNotDuplicate(newEmail, "old@example.com") }
-                }
-            assertEquals("User with email: '$newEmail' already exists", exception.message)
-        }
+        assertDoesNotThrow { userValidator.validateCreateUser(email, "Name", 25) }
+    }
 
     @Test
-    fun `validateCreateUser should pass for valid input`() =
-        runTest {
-            val email = "new@example.com"
-            coEvery { userRepository.findByEmail(email) } returns null
+    fun `validateUpdateUser should pass for valid input`() {
+        val id = UUID.randomUUID()
+        val email = "new@example.com"
+        val existingUser = UserEntity(id, "old@example.com", "Old Name", 20, now, now)
 
-            assertDoesNotThrow { runBlocking { userRepository.validateCreateUser(email, "Name", 25) } }
-        }
+        every { userRepository.findById(id) } returns existingUser
+        every { userRepository.findByEmail(email) } returns null
 
-    @Test
-    fun `validateUpdateUser should pass for valid input`() =
-        runTest {
-            val id = UUID.randomUUID()
-            val email = "new@example.com"
-            val existingUser = UserEntity(id, "old@example.com", "Old Name", 20, now, now)
-
-            coEvery { userRepository.findById(id) } returns existingUser
-            coEvery { userRepository.findByEmail(email) } returns null
-
-            assertDoesNotThrow { runBlocking { userRepository.validateUpdateUser(id, email, "New Name", 25) } }
-        }
+        assertDoesNotThrow { userValidator.validateUpdateUser(id, email, "New Name", 25) }
+    }
 
     @Test
-    fun `validateUpdateUser should throw NotFoundException if user does not exist`() =
-        runTest {
-            val id = UUID.randomUUID()
-            coEvery { userRepository.findById(id) } returns null
+    fun `validateUpdateUser should pass with nullable parameters`() {
+        val id = UUID.randomUUID()
+        val existingUser = UserEntity(id, "old@example.com", "Old Name", 20, now, now)
 
-            assertThrows(NotFoundException::class.java) {
-                runBlocking { userRepository.validateUpdateUser(id, "email@example.com", "Name", 25) }
-            }
-        }
+        every { userRepository.findById(id) } returns existingUser
+        every { userRepository.findByEmail("new@example.com") } returns null
 
-    @Test
-    fun `validateDeleteUser should pass if user exists`() =
-        runTest {
-            val id = UUID.randomUUID()
-            val existingUser = UserEntity(id, "test@example.com", "Name", 20, now, now)
-
-            coEvery { userRepository.findById(id) } returns existingUser
-
-            assertDoesNotThrow { runBlocking { userRepository.validateDeleteUser(id) } }
-        }
+        // Test with null values (partial update)
+        assertDoesNotThrow { userValidator.validateUpdateUser(id, null, null, null) }
+        assertDoesNotThrow { userValidator.validateUpdateUser(id, "new@example.com", null, null) }
+        assertDoesNotThrow { userValidator.validateUpdateUser(id, null, "New Name", null) }
+        assertDoesNotThrow { userValidator.validateUpdateUser(id, null, null, 30) }
+    }
 
     @Test
-    fun `validateDeleteUser should throw NotFoundException if user does not exist`() =
-        runTest {
-            val id = UUID.randomUUID()
-            coEvery { userRepository.findById(id) } returns null
+    fun `validateUpdateUser should throw NotFoundException if user does not exist`() {
+        val id = UUID.randomUUID()
+        every { userRepository.findById(id) } returns null
 
-            assertThrows(NotFoundException::class.java) {
-                runBlocking { userRepository.validateDeleteUser(id) }
-            }
+        assertThrows(NotFoundException::class.java) {
+            userValidator.validateUpdateUser(id, "email@example.com", "Name", 25)
         }
+    }
+
+    @Test
+    fun `validateDeleteUser should pass if user exists`() {
+        val id = UUID.randomUUID()
+        val existingUser = UserEntity(id, "test@example.com", "Name", 20, now, now)
+
+        every { userRepository.findById(id) } returns existingUser
+
+        assertDoesNotThrow { userValidator.validateDeleteUser(id) }
+    }
+
+    @Test
+    fun `validateDeleteUser should throw NotFoundException if user does not exist`() {
+        val id = UUID.randomUUID()
+        every { userRepository.findById(id) } returns null
+
+        assertThrows(NotFoundException::class.java) {
+            userValidator.validateDeleteUser(id)
+        }
+    }
 }

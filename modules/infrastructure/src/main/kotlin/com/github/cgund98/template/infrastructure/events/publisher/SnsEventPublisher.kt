@@ -2,7 +2,7 @@ package com.github.cgund98.template.infrastructure.events.publisher
 
 import aws.sdk.kotlin.services.sns.SnsClient
 import aws.sdk.kotlin.services.sns.model.PublishRequest
-import com.github.cgund98.template.infrastructure.events.registry.BaseEvent
+import com.github.cgund98.template.infrastructure.events.registry.EventEnvelope
 import com.github.cgund98.template.infrastructure.events.serializer.EventSerializer
 
 class SnsEventPublisher(
@@ -10,7 +10,7 @@ class SnsEventPublisher(
     private val snsClient: SnsClient,
     private val topicArn: String,
 ) : EventPublisher {
-    override suspend fun <P, T : BaseEvent<P>> publish(event: T) {
+    override suspend fun <P, T : EventEnvelope<P>> publish(event: T) {
         val messageBody = serializer.serialize(event)
 
         val request =

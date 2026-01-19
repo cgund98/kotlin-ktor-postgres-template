@@ -27,7 +27,7 @@ object AppConfig {
 
             env.entries().forEach {
                 vars[it.key] = it.value
-                System.setProperty(it.key, it.value)
+                System.setProperty(it.key, it.value) // Do this so logback can detect values
             }
         }
     }
@@ -38,8 +38,6 @@ object AppConfig {
 
     val data: Settings =
         Settings(
-            logLevel = vars["LOG_LEVEL"] ?: "INFO",
-            logFormat = vars["LOG_FORMAT"] ?: "JSON",
             postgres =
                 PostgresSettings(
                     url = vars["POSTGRES_URL"] ?: "",
@@ -72,8 +70,6 @@ object AppConfig {
 }
 
 data class Settings(
-    val logLevel: String,
-    val logFormat: String,
     val postgres: PostgresSettings,
     val api: ApiSettings,
     val aws: AwsSettings,

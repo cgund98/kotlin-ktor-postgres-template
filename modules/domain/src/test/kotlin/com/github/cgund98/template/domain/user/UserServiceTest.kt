@@ -6,12 +6,17 @@ import com.github.cgund98.template.domain.user.repo.UpdateUserParams
 import com.github.cgund98.template.domain.user.repo.UserEntity
 import com.github.cgund98.template.domain.user.repo.UserRepository
 import com.github.cgund98.template.infrastructure.db.TransactionManager
+import com.github.cgund98.template.infrastructure.events.publisher.EventPublisher
+import com.github.cgund98.template.infrastructure.events.registry.user.UserCreated
+import com.github.cgund98.template.infrastructure.events.registry.user.UserDeleted
+import com.github.cgund98.template.infrastructure.events.registry.user.UserUpdated
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.slot
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.test.runTest
-import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -20,13 +25,15 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
+@OptIn(ExperimentalTime::class)
 class UserServiceTest {
     private val userRepository = mockk<UserRepository>()
+    private val eventPublisher = mockk<EventPublisher>(relaxed = true)
     private val txManager =
         object : TransactionManager {
             override suspend fun <T> withTransaction(block: suspend () -> T): T = block()
         }
-    private val userService = UserService(txManager, userRepository)
+    private val userService = UserService(txManager, userRepository, eventPublisher)
 
     private val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
 
@@ -42,6 +49,7 @@ class UserServiceTest {
             // Mock the validation dependencies
             coEvery { userRepository.findByEmail(email) } returns null
             coEvery { userRepository.create(any()) } returns userEntity
+            coEvery { eventPublisher.publish(any<UserCreated>()) } returns Unit
 
             val result = userService.createUser(email, name, age)
 
@@ -58,6 +66,14 @@ class UserServiceTest {
             assertEquals(email, slot.captured.email)
             assertEquals(name, slot.captured.name)
             assertEquals(age, slot.captured.age)
+
+            // Verify event was published
+            val eventSlot = slot<UserCreated>()
+            coVerify { eventPublisher.publish(capture(eventSlot)) }
+            assertEquals(userId, eventSlot.captured.payload.id)
+            assertEquals(email, eventSlot.captured.payload.email)
+            assertEquals(name, eventSlot.captured.payload.name)
+            assertEquals(age, eventSlot.captured.payload.age)
         }
 
     @Test
@@ -74,6 +90,7 @@ class UserServiceTest {
             coEvery { userRepository.findById(id) } returns originalUser
             coEvery { userRepository.findByEmail(email) } returns null
             coEvery { userRepository.update(any()) } returns updatedUser
+            coEvery { eventPublisher.publish(any<UserUpdated>()) } returns Unit
 
             val result = userService.updateUser(id, email, name, age)
 
@@ -92,6 +109,14 @@ class UserServiceTest {
             assertEquals(email, slot.captured.email)
             assertEquals(name, slot.captured.name)
             assertEquals(age, slot.captured.age)
+
+            // Verify event was published
+            val eventSlot = slot<UserUpdated>()
+            coVerify { eventPublisher.publish(capture(eventSlot)) }
+            assertEquals(id, eventSlot.captured.payload.id)
+            assertEquals(email, eventSlot.captured.payload.email)
+            assertEquals(name, eventSlot.captured.payload.name)
+            assertEquals(age, eventSlot.captured.payload.age)
         }
 
     @Test
@@ -146,11 +171,17 @@ class UserServiceTest {
             // Mock validation dependencies
             coEvery { userRepository.findById(id) } returns userEntity
             coEvery { userRepository.delete(id) } returns true
+            coEvery { eventPublisher.publish(any<UserDeleted>()) } returns Unit
 
             val result = userService.deleteUser(id)
 
             assertTrue(result)
             coVerify { userRepository.findById(id) }
             coVerify { userRepository.delete(id) }
+
+            // Verify event was published
+            val eventSlot = slot<UserDeleted>()
+            coVerify { eventPublisher.publish(capture(eventSlot)) }
+            assertEquals(id, eventSlot.captured.payload.id)
         }
 }

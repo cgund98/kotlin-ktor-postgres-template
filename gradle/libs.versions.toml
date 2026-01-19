@@ -28,9 +28,13 @@ ktor-server-swagger = { module = "io.ktor:ktor-server-swagger", version.ref = "k
 ktor-server-status-pages = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor" }
 ktor-server-call-logging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor" }
 
+# Kotlinx
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.10.2" }
+
 # Logging
 kotlin-logging-jvm = { module = "io.github.oshai:kotlin-logging-jvm", version = "7.0.3" }
 logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "8.0" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version = "1.5.25" }
 
 # Exposed - database interactions
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
