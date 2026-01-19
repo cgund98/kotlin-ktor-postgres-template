@@ -1,9 +1,9 @@
 package com.github.cgund98.template.app.api
 
 import com.github.cgund98.template.core.config.AppConfig
+import com.github.cgund98.template.domain.user.userModule
 import com.github.cgund98.template.infrastructure.infrastructureModule
 import com.github.cgund98.template.presentation.installStatusPages
-import com.github.cgund98.template.presentation.user.userModule
 import com.github.cgund98.template.presentation.user.userRoutes
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.serialization.kotlinx.json.json
@@ -41,7 +41,6 @@ fun main() {
     ).start(wait = true)
 }
 
-// Ensure this is a top-level function or a visible extension
 suspend fun Application.module() {
     install(Koin) {
         modules(
@@ -62,9 +61,6 @@ suspend fun Application.module() {
     routing {
         swaggerUI(path = "docs", swaggerFile = AppConfig.data.api.openApiPath)
 
-        get("/") {
-            call.respondText("Hello from Kotlin Monolith! (Verified)")
-        }
         get("/health") {
             call.respondText("Healthy")
         }

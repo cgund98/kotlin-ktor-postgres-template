@@ -55,6 +55,19 @@ object AppConfig {
                     port = vars["API_PORT"]?.toInt() ?: 8000,
                     openApiPath = vars["API_OPENAPI_PATH"] ?: DEV_OPENAPI_PATH,
                 ),
+            aws =
+                AwsSettings(
+                    region = vars["AWS_REGION"] ?: "",
+                    endpoint = vars["AWS_ENDPOINT"],
+                    useLocalstack = vars["AWS_USE_LOCALSTACK"]?.toBoolean() ?: false,
+                ),
+            events =
+                EventsSettings(
+                    topicArn = vars["EVENTS_TOPIC_ARN"] ?: "",
+                    queueUrlUserCreated = vars["EVENTS_QUEUE_URL_USER_CREATED"] ?: "",
+                    queueUrlUserUpdated = vars["EVENTS_QUEUE_URL_USER_UPDATED"] ?: "",
+                    queueUrlUserDeleted = vars["EVENTS_QUEUE_URL_USER_DELETED"] ?: "",
+                ),
         )
 }
 
@@ -63,6 +76,8 @@ data class Settings(
     val logFormat: String,
     val postgres: PostgresSettings,
     val api: ApiSettings,
+    val aws: AwsSettings,
+    val events: EventsSettings,
 )
 
 data class PostgresSettings(
@@ -77,4 +92,17 @@ data class PostgresSettings(
 data class ApiSettings(
     val port: Int,
     val openApiPath: String,
+)
+
+data class AwsSettings(
+    val region: String,
+    val endpoint: String?,
+    val useLocalstack: Boolean,
+)
+
+data class EventsSettings(
+    val topicArn: String,
+    val queueUrlUserCreated: String,
+    val queueUrlUserUpdated: String,
+    val queueUrlUserDeleted: String,
 )

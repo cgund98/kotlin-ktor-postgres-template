@@ -1,6 +1,6 @@
 FROM eclipse-temurin:21-jdk-jammy
 
-# 1. Install standard utilities for your Makefile/Shell
+# Install standard utilities for your Makefile/Shell
 RUN apt-get update && apt-get install -y \
     curl \
     git \
@@ -8,10 +8,16 @@ RUN apt-get update && apt-get install -y \
     unzip \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Install yamlfmt
+# Install yamlfmt
 RUN curl -L https://github.com/google/yamlfmt/releases/download/v0.21.0/yamlfmt_0.21.0_Linux_x86_64.tar.gz | tar xz -C /usr/local/bin yamlfmt
 
-# 3. Create a non-root user (Standard practice for 2026)
+# Install AWS CLI v2
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+    unzip -q awscliv2.zip && \
+    ./aws/install && \
+    rm -rf awscliv2.zip aws
+
+# Create a non-root user (Standard practice for 2026)
 # This prevents 'root' from owning your local files when you mount volumes
 ARG USERNAME=workspace
 ARG USER_UID=1000
@@ -24,14 +30,10 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
+RUN mkdir -p /home/workspace/.gradle && chown -R $USERNAME:$USERNAME /home/workspace/.gradle
+
 USER $USERNAME
 WORKDIR /workspace
-
-# 4. Pre-warm Gradle (Optional but recommended)
-# This downloads Gradle so your first 'make lint' is instant
-COPY --chown=workspace:workspace gradlew .
-COPY --chown=workspace:workspace gradle gradle
-RUN ./gradlew --version
 
 # Keep the container running for 'docker exec'
 CMD ["sleep", "infinity"]

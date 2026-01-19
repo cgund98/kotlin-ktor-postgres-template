@@ -1,6 +1,5 @@
-package com.github.cgund98.template.presentation.user
+package com.github.cgund98.template.domain.user
 
-import com.github.cgund98.template.domain.user.UserService
 import com.github.cgund98.template.domain.user.repo.ExposedUserRepository
 import com.github.cgund98.template.domain.user.repo.UserRepository
 import org.koin.core.module.dsl.bind

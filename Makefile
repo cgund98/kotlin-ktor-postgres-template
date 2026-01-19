@@ -67,3 +67,30 @@ migrate-up: migrate ## Alias for migrate
 
 migrate-down: build-migrations ## Rollback last migration
 	docker compose run --rm migrate -path /migrations -database "postgres://postgres:postgres@postgres:5432/app?sslmode=disable" down
+
+# LocalStack commands
+localstack-up:
+	@echo "Starting LocalStack..."
+	docker compose up -d localstack
+	@echo "Waiting for LocalStack to be ready..."
+	@timeout=60; \
+	while [ $$timeout -gt 0 ]; do \
+		if docker compose exec -T localstack curl -f http://localhost:4566/_localstack/health >/dev/null 2>&1; then \
+			echo "LocalStack is ready!"; \
+			exit 0; \
+		fi; \
+		sleep 2; \
+		timeout=$$((timeout - 2)); \
+	done; \
+	echo "Warning: LocalStack may not be fully ready yet"
+
+localstack-setup: localstack-up
+	@echo "Setting up LocalStack resources (SNS topics and SQS queues)..."
+	@$(EXEC) bash resources/scripts/localstack_setup.sh
+
+localstack-down:
+	@echo "Stopping LocalStack..."
+	docker compose stop localstack
+
+localstack-logs:
+	docker compose logs -f localstack

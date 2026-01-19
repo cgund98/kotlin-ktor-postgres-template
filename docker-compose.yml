@@ -4,14 +4,15 @@ services:
     build:
       context: .
       dockerfile: ./resources/docker/workspace.Dockerfile
+    platform: linux/amd64
     environment:
       - IO_KTOR_DEVELOPMENT=true
     volumes:
       - .:/workspace
-      - gradle_cache:/cache/gradle # Mount the named volume
+      - gradle_cache:/home/workspace/.gradle # Cache gradle builds
     command: sleep infinity
     ports:
-      - 8000:8000
+      - "8000:8000"
   postgres:
     image: postgres:16
     container_name: kotlin-ktor-postgres-template-db
@@ -43,6 +44,25 @@ services:
         condition: service_healthy
     profiles:
       - migrate
+  localstack:
+    image: localstack/localstack:latest
+    container_name: go-postgres-api-template-localstack
+    ports:
+      - "4566:4566"
+      - "4510-4559:4510-4559" # External services port range
+    environment:
+      - SERVICES=sns,sqs
+      - DEBUG=1
+      - PERSISTENCE=0
+      - LAMBDA_EXECUTOR=local
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 volumes:
-  gradle_cache: # Define the named volume here
+  gradle_cache:
   postgres_data:

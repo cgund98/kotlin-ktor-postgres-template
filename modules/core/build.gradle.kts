@@ -5,4 +5,6 @@ plugins {
 
 dependencies {
     implementation(libs.dotenv.kotlin)
+
+    implementation(libs.kotlinx.serialization.json)
 }

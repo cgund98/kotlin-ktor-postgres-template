@@ -2,11 +2,14 @@
 # https://docs.gradle.org/current/userguide/version_catalogs.html#sec::toml-dependencies-format
 
 [versions]
+kotlin = "2.1.0"
+kotlinx-serialization-json = "1.7.3"
 kotlin-gradle-plugin = "2.2.21"
 ktor = "3.3.3"
 exposed = "1.0.0-rc-3"
 koin-bom = "4.1.1"
 postgresql = "42.7.4"
+aws-sdk-kotlin = "1.5.122"
 
 detekt = "1.23.6"
 ktlint = "12.1.1"
@@ -51,6 +54,16 @@ hikari = { module = "com.zaxxer:HikariCP", version = "6.2.1" }
 plugin-detekt = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 plugin-ktlint = { module = "org.jlleitschuh.gradle:ktlint-gradle", version.ref = "ktlint" }
 
+# JSON
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
+
+# AWS
+aws-bom = { group = "aws.sdk.kotlin", name = "bom", version.ref = "aws-sdk-kotlin" }
+aws-sns = { group = "aws.sdk.kotlin", name = "sns" }
+aws-sqs = { group = "aws.sdk.kotlin", name = "sqs" }
+
+[plugins]
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
 [bundles]
 # Group them so you only have to add one line to your build file

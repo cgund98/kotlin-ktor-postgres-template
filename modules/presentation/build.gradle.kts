@@ -2,7 +2,7 @@ plugins {
     id("buildlogic.kotlin-library-conventions")
     id("buildlogic.linting-conventions")
     id("io.ktor.plugin") version "3.3.3"
-    kotlin("plugin.serialization") version "2.1.0"
+    alias(libs.plugins.kotlin.serialization)
 }
 
 dependencies {

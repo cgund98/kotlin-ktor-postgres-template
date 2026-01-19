@@ -6,6 +6,10 @@ plugins {
 dependencies {
     implementation(libs.bundles.exposed)
 
+    implementation(platform(libs.koin.bom))
+    implementation(libs.koin.core)
+    implementation(libs.koin.ktor)
+
     implementation(project(":modules:infrastructure"))
     api("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
 
