@@ -70,8 +70,6 @@ suspend fun Application.module() {
     installStatusPages()
 
     routing {
-
-
         get("/health") {
             call.respondText("Healthy")
         }

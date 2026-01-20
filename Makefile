@@ -25,43 +25,38 @@ workspace-shell: ## Open a shell in the workspace container
 shell: workspace-shell ## Alias for workspace-shell
 
 # Linting and formatting
-lint: ## Run checkstyle/ktlint checks
-	$(EXEC) ./gradlew ktlintCheck detekt
+lint: ## Run checks
+	$(EXEC) yamlfmt -lint .
+	$(EXEC) ktlint --relative "**/*.kt" "**/*.kts" "!**/bin/**"
+	$(EXEC) detekt --input modules --excludes "**/bin/**" --config detekt.yml --build-upon-default-config --parallel --base-path .
 
-fix: ## Automatically fix Kotlin formatting
+fix: ## Automatically fix formatting
 	$(EXEC) yamlfmt .
-	$(EXEC) ./gradlew ktlintFormat
-	$(EXEC) ./gradlew detekt --auto-correct
+	$(EXEC) ktlint -F --relative "**/*.kt" "**/*.kts" "!**/bin/**"
 
 # Testing
 test: ## Run tests (unit + integration)
-	$(EXEC) ./gradlew test
+	$(EXEC) ./amper test
 
 # Build
-build-all: ## Run a full build (compilation + check + test)
-	$(EXEC) ./gradlew build
+build-all: ## Run a full build
+	$(EXEC) ./amper build
 
-refresh: ## Force Gradle to refresh dependencies
-	$(EXEC) ./gradlew build --refresh-dependencies
-
-gradle-watch: ## Run Gradle in continuous mode to recompile on changes
-	$(EXEC) ./gradlew -t classes
-
-gradle-clean: ## Clean Gradle build artifacts
-	$(EXEC) ./gradlew clean
+clean: ## Clean build artifacts
+	$(EXEC) rm -rf .amper build .gradle
 
 # Run dev servers
 run-api: ## Run the API application using Amper
 	$(EXEC) ./amper run --module app-api
 
 watch-api: ## Run the API application with live reload using watchexec and Amper
-	$(EXEC) watchexec --force-poll 500 -r -e kt -- ./amper run --module app-api
+	$(EXEC) watchexec --force-poll 1000 -r -e kt -- ./amper run --module app-api
 
 run-worker: ## Run the Worker application using Amper
 	$(EXEC) ./amper run --module app-worker
 
 watch-worker: ## Run the Worker application with live reload using watchexec and Amper
-	$(EXEC) watchexec --force-poll 500 -r -e kt -- ./amper run --module app-worker
+	$(EXEC) watchexec --force-poll 1000 -r -e kt -- ./amper run --module app-worker
 
 # Migrations
 build-migrations: ## Build the migration Docker image

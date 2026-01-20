@@ -11,21 +11,38 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
-          distribution: 'temurin'
-      - name: Cache Gradle dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-      - name: Run ktlint and detekt
-        run: ./gradlew ktlintCheck detekt
+          java-version: "21"
+          distribution: "temurin"
+      - name: Install linters (yamlfmt, ktlint, detekt)
+        env:
+          YAMLFMT_VERSION: "0.21.0"
+          KTLINT_VERSION: "1.8.0"
+          DETEKT_VERSION: "1.23.8"
+        run: |
+          set -euo pipefail
+          mkdir -p .ci/bin
+          echo "$(pwd)/.ci/bin" >> "$GITHUB_PATH"
+
+          curl -sSLo /tmp/yamlfmt.tar.gz "https://github.com/google/yamlfmt/releases/download/v${YAMLFMT_VERSION}/yamlfmt_${YAMLFMT_VERSION}_Linux_x86_64.tar.gz"
+          tar xzf /tmp/yamlfmt.tar.gz -C .ci/bin yamlfmt
+          chmod +x .ci/bin/yamlfmt
+
+          curl -sSLo .ci/bin/ktlint "https://github.com/pinterest/ktlint/releases/download/${KTLINT_VERSION}/ktlint"
+          chmod +x .ci/bin/ktlint
+
+          curl -sSLo /tmp/detekt.zip "https://github.com/detekt/detekt/releases/download/v${DETEKT_VERSION}/detekt-cli-${DETEKT_VERSION}.zip"
+          unzip -q /tmp/detekt.zip -d .ci
+          ln -sf "$(pwd)/.ci/detekt-cli-${DETEKT_VERSION}/bin/detekt-cli" .ci/bin/detekt
+
+          yamlfmt --version
+          ktlint --version
+          detekt --version
+      - name: Run yamlfmt
+        run: yamlfmt -lint .
+      - name: Run ktlint
+        run: ktlint --relative "**/*.kt" "**/*.kts" "!**/bin/**"
+      - name: Run detekt
+        run: detekt --input modules --excludes "**/bin/**" --config detekt.yml --build-upon-default-config --parallel --base-path .
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -35,21 +52,20 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
-          distribution: 'temurin'
-      - name: Cache Gradle dependencies
+          java-version: "21"
+          distribution: "temurin"
+      - name: Cache Amper shared caches
         uses: actions/cache@v4
         with:
           path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+            ~/.cache/JetBrains/Amper
+          key: ${{ runner.os }}-amper-${{ hashFiles('project.yaml', 'libs.versions.toml', 'modules/**/module.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-gradle-
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-      - name: Run tests
-        run: ./gradlew test
+            ${{ runner.os }}-amper-
+      - name: Run tests (Amper)
+        run: |
+          chmod +x ./amper
+          ./amper test
   build-image:
     name: Build Production Image
     runs-on: ubuntu-latest

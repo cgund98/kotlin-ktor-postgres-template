@@ -8,27 +8,17 @@ FROM eclipse-temurin:21-jdk-jammy AS builder
 
 WORKDIR /build
 
-# Copy Gradle wrapper and configuration files first (for better layer caching)
-COPY gradle/ ./gradle/
-COPY gradlew ./
-COPY gradlew.bat ./
-COPY build.gradle.kts ./
-COPY settings.gradle.kts ./
-COPY gradle.properties ./
+# Copy Amper wrapper and configuration files first
+COPY amper ./
+COPY project.yaml ./
+COPY libs.versions.toml ./gradle/
 
-# Copy buildSrc for build conventions
-COPY buildSrc/ ./buildSrc/
-
-# Make gradlew executable
-RUN chmod +x ./gradlew
-
-# Copy all modules (source code and build files)
+# Copy all modules (source code and Amper module files)
 COPY modules/ ./modules/
 
-# Build both application distributions and generate OpenAPI schema
-# This creates complete distributions with all dependencies for both API and Worker
-# The buildOpenApi task generates openapi.json in the project root
-RUN ./gradlew :modules:app-api:installDist :modules:app-worker:installDist :modules:presentation:buildOpenApi --no-daemon --warning-mode all
+# Build all modules using Amper
+# This will produce executable jars (with BOOT-INF/lib) for jvm/app modules
+RUN ./amper package --module app-api --module app-worker --format executable-jar
 
 # Runtime stage - use JRE for smaller image size
 FROM eclipse-temurin:21-jre-jammy
@@ -49,20 +39,14 @@ RUN groupadd --gid ${USER_GID} ${USERNAME} && \
 # Set working directory
 WORKDIR /app
 
-# Copy both built applications from builder stage
-# API application
-COPY --from=builder --chown=${USERNAME}:${USERNAME} /build/modules/app-api/build/install/app-api/ ./api/
-# Worker application
-COPY --from=builder --chown=${USERNAME}:${USERNAME} /build/modules/app-worker/build/install/app-worker/ ./worker/
-# Copy OpenAPI schema to API directory (API looks for it in working directory)
-COPY --from=builder --chown=${USERNAME}:${USERNAME} /build/openapi.json ./api/openapi.json
+# Copy built artifacts and Amper for running
+COPY --from=builder --chown=${USERNAME}:${USERNAME} /build /app
 
 # Switch to non-root user
 USER ${USERNAME}
 
-# Expose port for API (Worker doesn't need it, but harmless)
+# Expose port for API
 EXPOSE 8000
 
 # Default command (will be overridden by docker-compose)
-# Note: Health checks should be configured in your orchestration layer (docker-compose, k8s, etc.)
 CMD ["sh", "-c", "echo 'Please specify which application to run: api or worker'"]

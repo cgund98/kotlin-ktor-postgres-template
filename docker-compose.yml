@@ -9,7 +9,7 @@ services:
       - IO_KTOR_DEVELOPMENT=true
     volumes:
       - .:/workspace
-      - gradle_cache:/home/workspace/.gradle # Cache gradle builds
+      - amper_cache:/home/workspace/.cache/JetBrains/Amper # Cache Amper downloads
     command: sleep infinity
     ports:
       - "8000:8000"
@@ -70,7 +70,7 @@ services:
       context: .
       dockerfile: ./resources/docker/app.Dockerfile
     container_name: kotlin-ktor-postgres-template-api
-    command: ["sh", "-c", "cd /app/api && ./bin/app-api"]
+    command: ["java", "-jar", "/app/build/tasks/_app-api_executableJarJvm/app-api-jvm-executable.jar"]
     ports:
       - "8001:8000" # Use different port to avoid conflict with workspace
     env_file:
@@ -94,7 +94,7 @@ services:
       context: .
       dockerfile: ./resources/docker/app.Dockerfile
     container_name: kotlin-ktor-postgres-template-worker
-    command: ["sh", "-c", "cd /app/worker && ./bin/app-worker"]
+    command: ["java", "-jar", "/app/build/tasks/_app-worker_executableJarJvm/app-worker-jvm-executable.jar"]
     env_file:
       - .env.local
     environment:
@@ -107,5 +107,5 @@ services:
     profiles:
       - production
 volumes:
-  gradle_cache:
+  amper_cache:
   postgres_data:
