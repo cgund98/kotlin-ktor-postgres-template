@@ -7,7 +7,7 @@
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.1.0-blue.svg)](https://kotlinlang.org/)
 [![Ktor](https://img.shields.io/badge/Ktor-3.3.3-green.svg)](https://ktor.io/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16+-blue.svg)](https://www.postgresql.org/)
-[![Gradle](https://img.shields.io/badge/Gradle-9.3+-orange.svg)](https://gradle.org/)
+[![Amper](https://img.shields.io/badge/Amper-0.9.2-6f42c1.svg)](https://github.com/JetBrains/amper)
 [![JDK](https://img.shields.io/badge/JDK-21-orange.svg)](https://adoptium.net/)
 
 *Built with ❤️ using Clean Architecture and Event-Driven Design*
@@ -92,8 +92,15 @@ This template uses Kotlin for several compelling reasons:
 - **detekt** - Static code analysis for Kotlin
 
 ### Development Tools
-- **Gradle** - Build tool with version catalogs
+- **Amper** - Build tool focused on developer experience and ease of use
 - **Docker & Docker Compose** - Containerized development environment
+
+## Why Amper (instead of Gradle)?
+
+This template uses **Amper** to prioritize:
+
+- **Developer experience**: fewer build files to maintain and a simpler mental model for common tasks
+- **Ease of use**: consistent commands for building, testing, running, and packaging across modules
 
 ## Architecture
 
@@ -297,8 +304,7 @@ make run-worker    # Start worker application
   - `db/migrations/` - Database migration files (version-controlled schema changes)
   - `docker/` - Dockerfile definitions for workspace and migration containers
   - `scripts/` - Utility scripts for AWS LocalStack and migrations
-- `buildSrc/` - Gradle build logic and conventions
-- `gradle/` - Gradle wrapper and version catalogs
+- `amper` / `project.yaml` / `modules/**/module.yaml` - Amper project configuration and module definitions
 
 ## License
 

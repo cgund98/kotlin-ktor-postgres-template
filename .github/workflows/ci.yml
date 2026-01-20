@@ -22,6 +22,7 @@ jobs:
           set -euo pipefail
           mkdir -p .ci/bin
           echo "$(pwd)/.ci/bin" >> "$GITHUB_PATH"
+          export PATH="$(pwd)/.ci/bin:$PATH"
 
           curl -sSLo /tmp/yamlfmt.tar.gz "https://github.com/google/yamlfmt/releases/download/v${YAMLFMT_VERSION}/yamlfmt_${YAMLFMT_VERSION}_Linux_x86_64.tar.gz"
           tar xzf /tmp/yamlfmt.tar.gz -C .ci/bin yamlfmt
@@ -33,6 +34,7 @@ jobs:
           curl -sSLo /tmp/detekt.zip "https://github.com/detekt/detekt/releases/download/v${DETEKT_VERSION}/detekt-cli-${DETEKT_VERSION}.zip"
           unzip -q /tmp/detekt.zip -d .ci
           ln -sf "$(pwd)/.ci/detekt-cli-${DETEKT_VERSION}/bin/detekt-cli" .ci/bin/detekt
+          chmod +x .ci/bin/detekt
 
           yamlfmt --version
           ktlint --version
