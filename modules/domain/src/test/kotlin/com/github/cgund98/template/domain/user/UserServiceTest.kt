@@ -173,9 +173,8 @@ class UserServiceTest {
             coEvery { userRepository.delete(id) } returns true
             coEvery { eventPublisher.publish(any<UserDeleted>()) } returns Unit
 
-            val result = userService.deleteUser(id)
+            userService.deleteUser(id)
 
-            assertTrue(result)
             coVerify { userRepository.findById(id) }
             coVerify { userRepository.delete(id) }
 

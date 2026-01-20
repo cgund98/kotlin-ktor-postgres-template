@@ -14,7 +14,19 @@ data class UserDeletedPayload(
 
 @Serializable
 class UserDeleted(
+    @Serializable(with = UUIDSerializer::class)
+    override val id: UUID,
+    override val timestamp: Long,
     override val payload: UserDeletedPayload,
 ) : EventEnvelope<UserDeletedPayload>() {
     override val type = EventType.USER_DELETED
+
+    companion object {
+        fun create(payload: UserDeletedPayload): UserDeleted =
+            UserDeleted(
+                id = EventEnvelope.generateId(),
+                timestamp = EventEnvelope.generateTimestamp(),
+                payload = payload,
+            )
+    }
 }
