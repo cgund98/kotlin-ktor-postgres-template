@@ -12,6 +12,7 @@
 
 # Package Files #
 *.jar
+!gradle/wrapper/gradle-wrapper.jar
 *.war
 *.nar
 *.ear
@@ -23,5 +24,25 @@
 hs_err_pid*
 replay_pid*
 
-# Kotlin Gradle plugin data, see https://kotlinlang.org/docs/whatsnew20.html#new-directory-for-kotlin-data-in-gradle-projects
+# Ignore Kotlin plugin data
+.kotlin
+
+# --- JVM / Gradle ---
+build/
+.gradle/
+out/
+bin/
+obj/
+
+# --- IntelliJ / JetBrains ---
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# --- Kotlin Specific ---
 .kotlin/
+
+# --- Generated OpenAPI schema
+openapi.json

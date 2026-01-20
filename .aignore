@@ -1,0 +1,8 @@
+# .aignore
+# Ignore build outputs to speed up AI retrieval
+**/build/
+**/.gradle/
+**/target/
+**/.idea/
+*.class
+*.jar

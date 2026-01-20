@@ -1,0 +1,19 @@
+<configuration>
+    <!-- This is meant to mute additional logs coming from outside the application  -->
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+
+    <appender name="PRETTY" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss} %highlight(%-5level) %cyan(%logger{20}) - %msg %yellow(%kvp) %n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+    </appender>
+
+    <root level="${LOG_LEVEL:-INFO}">
+        <appender-ref ref="${LOG_FORMAT:-JSON}" />
+    </root>
+</configuration>
+
