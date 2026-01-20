@@ -63,6 +63,52 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  # Production API service (for testing production Dockerfile)
+  app-api:
+    image: kotlin-ktor-postgres-template-prod:latest
+    build:
+      context: .
+      dockerfile: ./resources/docker/app.Dockerfile
+    container_name: kotlin-ktor-postgres-template-api
+    command: ["sh", "-c", "cd /app/api && ./bin/app-api"]
+    ports:
+      - "8001:8000" # Use different port to avoid conflict with workspace
+    env_file:
+      - .env.local
+    environment:
+      - LOG_FORMAT=JSON
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Production Worker service (for testing production Dockerfile)
+  app-worker:
+    image: kotlin-ktor-postgres-template-prod:latest
+    build:
+      context: .
+      dockerfile: ./resources/docker/app.Dockerfile
+    container_name: kotlin-ktor-postgres-template-worker
+    command: ["sh", "-c", "cd /app/worker && ./bin/app-worker"]
+    env_file:
+      - .env.local
+    environment:
+      - LOG_FORMAT=JSON
+    depends_on:
+      postgres:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    profiles:
+      - production
+
 volumes:
   gradle_cache:
   postgres_data:

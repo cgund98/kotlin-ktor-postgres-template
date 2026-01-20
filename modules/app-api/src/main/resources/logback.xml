@@ -13,7 +13,7 @@
     </appender>
 
     <root level="${LOG_LEVEL:-INFO}">
-        <appender-ref ref="${LOG_FORMAT:-PRETTY}" />
+        <appender-ref ref="${LOG_FORMAT:-JSON}" />
     </root>
 </configuration>
 

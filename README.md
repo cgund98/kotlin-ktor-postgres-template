@@ -1,6 +1,29 @@
-# Kotlin PostgreSQL Template
+# 🚀 Kotlin PostgreSQL Template
 
-A production-ready Kotlin web API template demonstrating modern best practices for building scalable backend services. This template includes a RESTful API server and an event-driven worker application that consumes messages from AWS SQS.
+<div align="center">
+
+**A production-ready Kotlin web API template demonstrating modern best practices for building scalable backend services**
+
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.1.0-blue.svg)](https://kotlinlang.org/)
+[![Ktor](https://img.shields.io/badge/Ktor-3.3.3-green.svg)](https://ktor.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16+-blue.svg)](https://www.postgresql.org/)
+[![Gradle](https://img.shields.io/badge/Gradle-9.3+-orange.svg)](https://gradle.org/)
+[![JDK](https://img.shields.io/badge/JDK-21-orange.svg)](https://adoptium.net/)
+
+*Built with ❤️ using Clean Architecture and Event-Driven Design*
+
+[Features](#-key-features) • [Quick Start](#-quick-start) • [Architecture](#-architecture) • [Development Guide](DEVELOPMENT.md)
+
+</div>
+
+## 👥 Who Is This For?
+
+This template is designed for **backend engineers** building:
+
+- RESTful APIs with clean separation between HTTP handlers, business logic, and data access
+- Event-driven microservices with async message processing (SQS/SNS)
+- Type-safe codebases with comprehensive type checking and fast unit tests
+- Production-ready systems with proper transaction management and error handling
 
 ## Overview
 
@@ -12,9 +35,24 @@ This template provides a solid foundation for building production-ready Kotlin a
 - **Database Migrations** - Version-controlled database schema migrations using migrate
 - **Configuration Management** - Support for `.env` files and environment variables for flexible deployment
 
-## Key Features
+## Why Kotlin?
+
+This template uses Kotlin for several compelling reasons:
+
+- **Modern Ergonomics** - Kotlin's concise syntax, null safety, and smart type inference reduce boilerplate while improving code readability. Features like data classes, extension functions, and when expressions make code more expressive and maintainable.
+
+- **Advanced Type System** - Kotlin's powerful type system catches errors at compile-time, reducing runtime bugs. Features like sealed classes, inline classes, and reified generics enable expressive domain modeling and type-safe abstractions.
+
+- **Excellent Concurrency Model** - Kotlin Coroutines provide a lightweight, efficient concurrency model that's perfect for modern async applications. Unlike traditional threading models, coroutines enable structured concurrency, making it easier to write and reason about concurrent code. This is especially valuable for event-driven architectures and high-throughput APIs.
+
+- **JVM Ecosystem** - Full interoperability with Java libraries and frameworks means you can leverage the vast JVM ecosystem while enjoying Kotlin's modern language features.
+
+- **Production Proven** - Used by companies like Google, JetBrains, and Square in production systems, demonstrating its reliability and performance at scale.
+
+## ✨ Key Features
 
 - ✅ **Production-Ready** - Includes error handling, logging, validation, and testing infrastructure
+- ✅ **Flexible Logging** - Toggle between JSON (production) and human-readable (development) formats via `LOG_FORMAT` environment variable
 - ✅ **Event-Driven Architecture** - SNS/SQS integration for pub/sub messaging patterns
 - ✅ **Environment Configuration** - Supports `.env.local` (committed) and `.env` (for sensitive values) with environment variable overrides
 - ✅ **OpenAPI Documentation** - Auto-generated API documentation available at `/docs`
@@ -216,10 +254,14 @@ Key configuration variables:
 
 - `POSTGRES_URL` - Database connection string
 - `API_PORT` - API server port (default: 8000)
+- `LOG_FORMAT` - Logging format: `JSON` for structured logs (production) or `PRETTY` for human-readable logs (development).
+- `LOG_LEVEL` - Logging level (default: `INFO`)
 - `AWS_REGION` - AWS region for SNS/SQS
 - `AWS_USE_LOCALSTACK` - Use LocalStack for local development
 - `EVENTS_TOPIC_ARN` - SNS topic ARN for event publishing
 - `EVENTS_QUEUE_URL_*` - SQS queue URLs for event consumption
+
+**Logging Format:** Set `LOG_FORMAT=JSON` for structured JSON logs (ideal for production and log aggregation tools) or `LOG_FORMAT=PRETTY` for human-readable colored logs (ideal for local development). This can be set in your `.env.local` file or as an environment variable.
 
 See `modules/core/src/main/kotlin/com/github/cgund98/template/core/config/AppConfig.kt` for all available configuration options.
 
