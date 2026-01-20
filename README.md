@@ -228,12 +228,18 @@ resources/
    make migrate
    ```
 
-5. **Start the API server**
+5. **Set up LocalStack (required for local development)**
+   ```bash
+   make localstack-setup
+   ```
+   LocalStack mocks AWS services (SNS/SQS) locally, allowing you to develop and test event-driven features without connecting to real AWS services.
+
+6. **Start the API server**
    ```bash
    make run-api
    ```
 
-6. **Start the worker (in a separate terminal)**
+7. **Start the worker (in a separate terminal)**
    ```bash
    make run-worker
    ```
@@ -257,9 +263,12 @@ Key configuration variables:
 - `LOG_FORMAT` - Logging format: `JSON` for structured logs (production) or `PRETTY` for human-readable logs (development).
 - `LOG_LEVEL` - Logging level (default: `INFO`)
 - `AWS_REGION` - AWS region for SNS/SQS
-- `AWS_USE_LOCALSTACK` - Use LocalStack for local development
+- `AWS_USE_LOCALSTACK` - Set to `true` to use LocalStack for mocking AWS services locally (required for local development)
+- `AWS_ENDPOINT` - AWS endpoint URL (set to `http://localstack:4566` when using LocalStack)
 - `EVENTS_TOPIC_ARN` - SNS topic ARN for event publishing
 - `EVENTS_QUEUE_URL_*` - SQS queue URLs for event consumption
+
+**LocalStack Setup:** LocalStack is required for local development as it mocks AWS services (SNS/SQS) locally. The API and Worker applications depend on these services for event publishing and consumption. Run `make localstack-setup` to start LocalStack and create the necessary SNS topics and SQS queues. Ensure `AWS_USE_LOCALSTACK=true` is set in your `.env.local` file.
 
 **Logging Format:** Set `LOG_FORMAT=JSON` for structured JSON logs (ideal for production and log aggregation tools) or `LOG_FORMAT=PRETTY` for human-readable colored logs (ideal for local development). This can be set in your `.env.local` file or as an environment variable.
 
