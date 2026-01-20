@@ -19,7 +19,6 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID
 import kotlin.time.Clock
@@ -173,9 +172,8 @@ class UserServiceTest {
             coEvery { userRepository.delete(id) } returns true
             coEvery { eventPublisher.publish(any<UserDeleted>()) } returns Unit
 
-            val result = userService.deleteUser(id)
+            userService.deleteUser(id)
 
-            assertTrue(result)
             coVerify { userRepository.findById(id) }
             coVerify { userRepository.delete(id) }
 

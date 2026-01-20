@@ -34,4 +34,14 @@ java {
 tasks.named<Test>("test") {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+    
+    // Parallel test execution
+    maxParallelForks = Runtime.getRuntime().availableProcessors().div(2).coerceAtLeast(1)
+    
+    // Fork a new JVM for each test class
+    setForkEvery(100)
+    
+    // Increase memory for tests
+    minHeapSize = "128m"
+    maxHeapSize = "512m"
 }

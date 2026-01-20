@@ -7,11 +7,9 @@ import com.github.cgund98.template.domain.user.repo.UserRepository
 import com.github.cgund98.template.infrastructure.db.TransactionManager
 import com.github.cgund98.template.infrastructure.events.publisher.EventPublisher
 import com.github.cgund98.template.infrastructure.events.registry.user.UserCreated
-import com.github.cgund98.template.infrastructure.events.registry.user.UserCreatedPayload
 import com.github.cgund98.template.infrastructure.events.registry.user.UserDeleted
 import com.github.cgund98.template.infrastructure.events.registry.user.UserDeletedPayload
 import com.github.cgund98.template.infrastructure.events.registry.user.UserUpdated
-import com.github.cgund98.template.infrastructure.events.registry.user.UserUpdatedPayload
 import java.util.UUID
 
 class UserService(
@@ -33,18 +31,12 @@ class UserService(
                 val params = CreateUserParams(email = email, name = name, age = age)
                 val entity = userRepository.create(params)
 
-                User.fromEntity(entity)
+                entity.toDomain()
             }
 
         // Publish an event
-        val payload =
-            UserCreatedPayload(
-                id = createdUser.id,
-                email = createdUser.email,
-                name = createdUser.name,
-                age = createdUser.age,
-            )
-        val event = UserCreated(payload)
+        val payload = createdUser.toCreatedPayload()
+        val event = UserCreated.create(payload)
 
         publisher.publish(event)
 
@@ -64,18 +56,12 @@ class UserService(
                 val params = UpdateUserParams(id = id, email = email, name = name, age = age)
                 val entity = userRepository.update(params)
 
-                User.fromEntity(entity)
+                entity.toDomain()
             }
 
         // Publish an event
-        val payload =
-            UserUpdatedPayload(
-                id = updatedUser.id,
-                email = updatedUser.email,
-                name = updatedUser.name,
-                age = updatedUser.age,
-            )
-        val event = UserUpdated(payload)
+        val payload = updatedUser.toUpdatedPayload()
+        val event = UserUpdated.create(payload)
 
         publisher.publish(event)
 
@@ -85,17 +71,17 @@ class UserService(
     suspend fun getUser(id: UUID): User? =
         txManager.withTransaction {
             val entity = userRepository.findById(id)
-            entity?.let { User.fromEntity(it) }
+            entity?.toDomain()
         }
 
     suspend fun listUsers(page: PageParams): Pair<List<User>, Long> =
         txManager.withTransaction {
             val count = userRepository.count()
             val users = userRepository.list(limit = page.size, offset = page.offset)
-            users.map { User.fromEntity(it) } to count
+            users.map { it.toDomain() } to count
         }
 
-    suspend fun deleteUser(id: UUID): Boolean {
+    suspend fun deleteUser(id: UUID) {
         txManager.withTransaction {
             userValidator.validateDeleteUser(id)
 
@@ -104,10 +90,8 @@ class UserService(
 
         // Publish an event
         val payload = UserDeletedPayload(id = id)
-        val event = UserDeleted(payload)
+        val event = UserDeleted.create(payload)
 
         publisher.publish(event)
-
-        return true
     }
 }

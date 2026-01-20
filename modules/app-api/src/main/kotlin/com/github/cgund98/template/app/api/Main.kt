@@ -35,7 +35,7 @@ fun main() {
 
     embeddedServer(
         Netty,
-        port = 8000,
+        port = AppConfig.data.api.port,
         watchPaths = listOf("classes"),
         module = Application::module,
     ).start(wait = true)

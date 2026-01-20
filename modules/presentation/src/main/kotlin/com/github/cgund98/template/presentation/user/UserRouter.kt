@@ -54,7 +54,7 @@ fun Route.userRoutes() {
             val id = getIdParameter()
 
             val user = userService.getUser(id)
-            val response = user?.let { GetUserResponse(user = it.toResponse()) } ?: GetUserResponse(user = null)
+            val response = GetUserResponse(user = user?.toResponse())
             call.respond(response)
         }
 
@@ -88,8 +88,8 @@ fun Route.userRoutes() {
         delete("/{id}") {
             val id = getIdParameter()
 
-            val success = userService.deleteUser(id)
-            val response = DeleteUserResponse(success = success)
+            userService.deleteUser(id)
+            val response = DeleteUserResponse(success = true)
             call.respond(HttpStatusCode.OK, response)
         }
     }

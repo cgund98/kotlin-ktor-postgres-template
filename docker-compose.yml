@@ -63,7 +63,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
   # Production API service (for testing production Dockerfile)
   app-api:
     image: kotlin-ktor-postgres-template-prod:latest
@@ -88,7 +87,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-
   # Production Worker service (for testing production Dockerfile)
   app-worker:
     image: kotlin-ktor-postgres-template-prod:latest
@@ -108,7 +106,6 @@ services:
         condition: service_healthy
     profiles:
       - production
-
 volumes:
   gradle_cache:
   postgres_data:

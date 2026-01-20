@@ -17,7 +17,19 @@ data class UserUpdatedPayload(
 
 @Serializable
 class UserUpdated(
+    @Serializable(with = UUIDSerializer::class)
+    override val id: UUID,
+    override val timestamp: Long,
     override val payload: UserUpdatedPayload,
 ) : EventEnvelope<UserUpdatedPayload>() {
     override val type = EventType.USER_UPDATED
+
+    companion object {
+        fun create(payload: UserUpdatedPayload): UserUpdated =
+            UserUpdated(
+                id = EventEnvelope.generateId(),
+                timestamp = EventEnvelope.generateTimestamp(),
+                payload = payload,
+            )
+    }
 }
