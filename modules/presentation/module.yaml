@@ -1,0 +1,30 @@
+product: jvm/lib
+layout: maven-like
+settings:
+  jvm:
+    release: 21
+  kotlin:
+    serialization: json
+  ktor:
+    enabled: true
+dependencies:
+  - ./../domain
+  - ./../infrastructure
+  - $libs.ktor.server.core
+  - $libs.ktor.server.netty
+  - $libs.ktor.server.content.negotiation
+  - $libs.ktor.serialization.kotlinx.json
+  - $libs.ktor.server.request.validation
+  - $libs.ktor.server.swagger
+  - $libs.ktor.server.status.pages
+  - $libs.ktor.server.call.logging
+  - $libs.ktor.server.openapi
+  - $libs.ktor.openapi
+  - $libs.ktor.swagger.ui
+  - $libs.kotlin.logging.jvm
+  - $libs.logstash.logback.encoder
+  - bom: $libs.koin.bom
+  - $libs.koin.core
+  - $libs.koin.ktor
+test-dependencies:
+  - $libs.junit.jupiter

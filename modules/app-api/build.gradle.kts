@@ -12,6 +12,8 @@ dependencies {
     implementation(libs.bundles.ktor.server)
     implementation(libs.bundles.exposed)
     implementation(libs.bundles.logging)
+    implementation(libs.ktor.openapi)
+    implementation(libs.ktor.swagger.ui)
 
     // Also add your internal domain module so the API can use your business logic
     implementation(project(":modules:domain"))

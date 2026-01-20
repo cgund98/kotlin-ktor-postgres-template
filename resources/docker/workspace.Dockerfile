@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     git \
     make \
     unzip \
+    xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
 # Install yamlfmt
@@ -16,6 +17,9 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
     unzip -q awscliv2.zip && \
     ./aws/install && \
     rm -rf awscliv2.zip aws
+
+# Install watchexec
+RUN curl -L https://github.com/watchexec/watchexec/releases/download/v1.23.0/watchexec-1.23.0-x86_64-unknown-linux-musl.tar.xz | tar xJ -C /usr/local/bin --strip-components=1 watchexec-1.23.0-x86_64-unknown-linux-musl/watchexec
 
 # Create a non-root user (Standard practice for 2026)
 # This prevents 'root' from owning your local files when you mount volumes

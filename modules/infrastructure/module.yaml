@@ -1,0 +1,25 @@
+product: jvm/lib
+layout: maven-like
+settings:
+  jvm:
+    release: 21
+  kotlin:
+    serialization: json
+dependencies:
+  - ./../core
+  - $libs.exposed.core
+  - $libs.exposed.jdbc
+  - $libs.exposed.datetime
+  - bom: $libs.koin.bom
+  - $libs.koin.core
+  - $libs.postgresql.driver
+  - $libs.hikari
+  - $libs.kotlinx.serialization.json
+  - $libs.kotlin.logging.jvm
+  - $libs.logstash.logback.encoder
+  - bom: $libs.aws.bom
+  - aws.sdk.kotlin:sns
+  - aws.sdk.kotlin:sqs
+test-dependencies:
+  - $libs.mockk
+  - $libs.junit.jupiter

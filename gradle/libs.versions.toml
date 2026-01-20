@@ -3,11 +3,12 @@
 
 [versions]
 kotlin = "2.1.0"
-kotlinx-serialization-json = "1.7.3"
+kotlinx-serialization-json = "1.9.0"
 kotlin-gradle-plugin = "2.2.21"
 kotlinx-coroutines = "1.10.2"
-kotlinx-datetime = "0.4.1"
+kotlinx-datetime = "0.6.1"
 ktor = "3.3.3"
+ktor-openapi = "5.4.0"
 exposed = "1.0.0-rc-3"
 koin-bom = "4.1.1"
 postgresql = "42.7.4"
@@ -18,7 +19,7 @@ ktlint = "12.1.1"
 
 # Testing
 mockk = "1.13.12"
-kotlinx-coroutines-test = "1.7.3"
+kotlinx-coroutines-test = "1.10.2"
 junit-jupiter = "5.12.1"
 
 
@@ -62,6 +63,10 @@ dotenv-kotlin = { module = "io.github.cdimascio:dotenv-kotlin", version = "6.4.1
 # Postgres
 postgresql-driver = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 hikari = { module = "com.zaxxer:HikariCP", version = "6.2.1" }
+
+# OpenAPI
+ktor-openapi = { module = "io.github.smiley4:ktor-openapi", version.ref = "ktor-openapi" }
+ktor-swagger-ui = { module = "io.github.smiley4:ktor-swagger-ui", version.ref = "ktor-openapi" }
 
 # Linters
 plugin-detekt = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }

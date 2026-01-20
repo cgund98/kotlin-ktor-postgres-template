@@ -51,13 +51,17 @@ gradle-clean: ## Clean Gradle build artifacts
 	$(EXEC) ./gradlew clean
 
 # Run dev servers
-run-api: ## Run the API application
-	# OpenAPI generation sometimes breaks when you tweak a route
-	# So we run clean before we build as a workaround
-	$(EXEC) ./gradlew clean :modules:app-api:run
+run-api: ## Run the API application using Amper
+	$(EXEC) ./amper run --module app-api
 
-run-worker: ## Run the Worker application with continuous build
-	$(EXEC) ./gradlew -t :modules:app-worker:run
+watch-api: ## Run the API application with live reload using watchexec and Amper
+	$(EXEC) watchexec --force-poll 500 -r -e kt -- ./amper run --module app-api
+
+run-worker: ## Run the Worker application using Amper
+	$(EXEC) ./amper run --module app-worker
+
+watch-worker: ## Run the Worker application with live reload using watchexec and Amper
+	$(EXEC) watchexec --force-poll 500 -r -e kt -- ./amper run --module app-worker
 
 # Migrations
 build-migrations: ## Build the migration Docker image

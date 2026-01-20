@@ -1,0 +1,33 @@
+product: jvm/app
+layout: maven-like
+settings:
+  jvm:
+    release: 21
+    mainClass: com.github.cgund98.template.app.api.MainKt
+  ktor:
+    enabled: true
+dependencies:
+  - ./../domain
+  - ./../presentation
+  - ./../infrastructure
+  - ./../core
+  - bom: $libs.koin.bom
+  - $libs.koin.core
+  - $libs.koin.ktor
+  - $libs.ktor.server.core
+  - $libs.ktor.server.netty
+  - $libs.ktor.server.content.negotiation
+  - $libs.ktor.serialization.kotlinx.json
+  - $libs.ktor.server.request.validation
+  - $libs.ktor.server.swagger
+  - $libs.ktor.server.status.pages
+  - $libs.ktor.server.call.logging
+  - $libs.ktor.openapi
+  - $libs.ktor.swagger.ui
+  - $libs.exposed.core
+  - $libs.exposed.jdbc
+  - $libs.exposed.datetime
+  - $libs.kotlin.logging.jvm
+  - $libs.logstash.logback.encoder
+test-dependencies:
+  - $libs.junit.jupiter

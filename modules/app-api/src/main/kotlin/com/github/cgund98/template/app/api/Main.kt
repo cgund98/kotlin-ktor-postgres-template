@@ -6,6 +6,10 @@ import com.github.cgund98.template.infrastructure.infrastructureModule
 import com.github.cgund98.template.presentation.installStatusPages
 import com.github.cgund98.template.presentation.user.userRoutes
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.github.smiley4.ktoropenapi.OpenApi
+import io.github.smiley4.ktoropenapi.openApi
+import io.github.smiley4.ktoropenapi.route
+import io.github.smiley4.ktorswaggerui.swaggerUI
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -14,7 +18,6 @@ import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.calllogging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.requestvalidation.RequestValidation
-import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
@@ -56,13 +59,30 @@ suspend fun Application.module() {
         json()
     }
 
+    install(OpenApi) {
+        info {
+            title = "Ktor Postgres Template"
+            version = "0.1.0"
+            description = "This is a sample API"
+        }
+    }
+
     installStatusPages()
 
     routing {
-        swaggerUI(path = "docs", swaggerFile = AppConfig.data.api.openApiPath)
+
 
         get("/health") {
             call.respondText("Healthy")
+        }
+
+        route("openapi.json") {
+            // Create a route to expose the OpenAPI specification file at `/api.json`.
+            openApi()
+        }
+
+        route("/docs") {
+            swaggerUI("../openapi.json")
         }
 
         userRoutes()

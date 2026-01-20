@@ -1,0 +1,21 @@
+product: jvm/lib
+layout: maven-like
+settings:
+  jvm:
+    release: 21
+dependencies:
+  - ./../infrastructure
+  - $libs.exposed.core
+  - $libs.exposed.jdbc
+  - $libs.exposed.datetime
+  - bom: $libs.koin.bom
+  - $libs.koin.core
+  - $libs.koin.ktor
+  - $libs.kotlin.logging.jvm
+  - $libs.logstash.logback.encoder
+  - $libs.kotlinx.datetime:
+      exported: true
+test-dependencies:
+  - $libs.mockk
+  - $libs.kotlinx.coroutines.test
+  - $libs.junit.jupiter

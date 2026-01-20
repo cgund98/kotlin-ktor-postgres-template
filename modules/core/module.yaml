@@ -1,0 +1,12 @@
+product: jvm/lib
+layout: maven-like
+settings:
+  jvm:
+    release: 21
+  kotlin:
+    serialization: json
+dependencies:
+  - $libs.dotenv.kotlin
+  - $libs.kotlinx.serialization.json
+test-dependencies:
+  - $libs.junit.jupiter

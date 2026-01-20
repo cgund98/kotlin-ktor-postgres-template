@@ -5,16 +5,16 @@ import com.github.cgund98.template.presentation.MissingParameterException
 import com.github.cgund98.template.presentation.PaginationMetadata
 import com.github.cgund98.template.presentation.parsePaginationParams
 import com.github.cgund98.template.presentation.parseUUIDParameter
+import io.github.smiley4.ktoropenapi.delete
+import io.github.smiley4.ktoropenapi.get
+import io.github.smiley4.ktoropenapi.patch
+import io.github.smiley4.ktoropenapi.post
+import io.github.smiley4.ktoropenapi.route
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.RoutingContext
-import io.ktor.server.routing.delete
-import io.ktor.server.routing.get
-import io.ktor.server.routing.patch
-import io.ktor.server.routing.post
-import io.ktor.server.routing.route
 import org.koin.ktor.ext.inject
 import java.util.UUID
 
@@ -26,15 +26,26 @@ fun RoutingContext.getIdParameter(): UUID {
 fun Route.userRoutes() {
     val userService by inject<UserService>()
 
-    /**
-     * @tag User
-     */
-    route("/users") {
-        /**
-         * @query page [Int] Page number
-         * @query size [Int] Number of items per page
-         */
-        get {
+    route("/users", {
+        tags = listOf("User")
+    }) {
+        get({
+            description = "List all users"
+            request {
+                queryParameter<Int>("page") {
+                    description = "Page number"
+                }
+                queryParameter<Int>("size") {
+                    description = "Number of items per page"
+                }
+            }
+            response {
+                HttpStatusCode.OK to {
+                    description = "Successful retrieval"
+                    body<ListUsersResponse>()
+                }
+            }
+        }) {
             val pageParams = parsePaginationParams()
             val (users, count) = userService.listUsers(page = pageParams.toDomain())
 
@@ -47,10 +58,20 @@ fun Route.userRoutes() {
             call.respond(response)
         }
 
-        /**
-         * @path id [String] User ID
-         */
-        get("/{id}") {
+        get("/{id}", {
+            description = "Get user by ID"
+            request {
+                pathParameter<String>("id") {
+                    description = "User ID"
+                }
+            }
+            response {
+                HttpStatusCode.OK to {
+                    description = "Successful retrieval"
+                    body<GetUserResponse>()
+                }
+            }
+        }) {
             val id = getIdParameter()
 
             val user = userService.getUser(id)
@@ -58,16 +79,38 @@ fun Route.userRoutes() {
             call.respond(response)
         }
 
-        post {
+        post({
+            description = "Create a new user"
+            request {
+                body<UserCreateRequest>()
+            }
+            response {
+                HttpStatusCode.Created to {
+                    description = "User created successfully"
+                    body<UserResponse>()
+                }
+            }
+        }) {
             val request = call.receive<UserCreateRequest>()
             val created = userService.createUser(email = request.email, name = request.name, age = request.age)
             call.respond(HttpStatusCode.Created, created.toResponse())
         }
 
-        /**
-         * @path id [String] User ID
-         */
-        patch("/{id}") {
+        patch("/{id}", {
+            description = "Update user by ID"
+            request {
+                pathParameter<String>("id") {
+                    description = "User ID"
+                }
+                body<UserUpdateRequest>()
+            }
+            response {
+                HttpStatusCode.OK to {
+                    description = "User updated successfully"
+                    body<UserResponse>()
+                }
+            }
+        }) {
             val id = getIdParameter()
 
             val request = call.receive<UserUpdateRequest>()
@@ -82,10 +125,20 @@ fun Route.userRoutes() {
             call.respond(HttpStatusCode.OK, user.toResponse())
         }
 
-        /**
-         * @path id [String] User ID
-         */
-        delete("/{id}") {
+        delete("/{id}", {
+            description = "Delete user by ID"
+            request {
+                pathParameter<String>("id") {
+                    description = "User ID"
+                }
+            }
+            response {
+                HttpStatusCode.OK to {
+                    description = "User deleted successfully"
+                    body<DeleteUserResponse>()
+                }
+            }
+        }) {
             val id = getIdParameter()
 
             userService.deleteUser(id)

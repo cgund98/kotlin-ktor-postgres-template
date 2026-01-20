@@ -1,0 +1,20 @@
+product: jvm/app
+layout: maven-like
+settings:
+  jvm:
+    release: 21
+    mainClass: com.github.cgund98.template.app.worker.MainKt
+dependencies:
+  - ./../domain
+  - ./../infrastructure
+  - ./../core
+  - bom: $libs.koin.bom
+  - $libs.koin.core
+  - $libs.kotlin.logging.jvm
+  - $libs.logstash.logback.encoder
+  - $libs.kotlinx.coroutines.core
+  - $libs.logback.classic
+  - bom: $libs.aws.bom
+  - aws.sdk.kotlin:sqs
+test-dependencies:
+  - $libs.junit.jupiter
