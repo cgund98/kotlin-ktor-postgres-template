@@ -46,3 +46,6 @@ out/
 
 # --- Generated OpenAPI schema
 openapi.json
+
+# --- VS Code ---
+.vscode/

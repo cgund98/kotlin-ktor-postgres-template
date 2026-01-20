@@ -12,8 +12,8 @@ dependencies {
     implementation(libs.bundles.logging)
 
     implementation(project(":modules:infrastructure"))
-    api("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+    api(libs.kotlinx.datetime)
 
-    testImplementation("io.mockk:mockk:1.13.12")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

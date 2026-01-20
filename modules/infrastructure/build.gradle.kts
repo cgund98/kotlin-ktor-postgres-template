@@ -19,5 +19,5 @@ dependencies {
 
     implementation(project(":modules:core"))
 
-    testImplementation("io.mockk:mockk:1.13.12")
+    testImplementation(libs.mockk)
 }

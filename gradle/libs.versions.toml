@@ -5,6 +5,8 @@
 kotlin = "2.1.0"
 kotlinx-serialization-json = "1.7.3"
 kotlin-gradle-plugin = "2.2.21"
+kotlinx-coroutines = "1.10.2"
+kotlinx-datetime = "0.4.1"
 ktor = "3.3.3"
 exposed = "1.0.0-rc-3"
 koin-bom = "4.1.1"
@@ -13,6 +15,11 @@ aws-sdk-kotlin = "1.5.122"
 
 detekt = "1.23.6"
 ktlint = "12.1.1"
+
+# Testing
+mockk = "1.13.12"
+kotlinx-coroutines-test = "1.7.3"
+junit-jupiter = "5.12.1"
 
 
 [libraries]
@@ -27,9 +34,11 @@ ktor-server-request-validation = { module = "io.ktor:ktor-server-request-validat
 ktor-server-swagger = { module = "io.ktor:ktor-server-swagger", version.ref = "ktor" }
 ktor-server-status-pages = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor" }
 ktor-server-call-logging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor" }
+ktor-server-openapi = { module = "io.ktor:ktor-server-openapi", version.ref = "ktor" }
 
 # Kotlinx
-kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.10.2" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 
 # Logging
 kotlin-logging-jvm = { module = "io.github.oshai:kotlin-logging-jvm", version = "7.0.3" }
@@ -66,6 +75,11 @@ aws-bom = { group = "aws.sdk.kotlin", name = "bom", version.ref = "aws-sdk-kotli
 aws-sns = { group = "aws.sdk.kotlin", name = "sns" }
 aws-sqs = { group = "aws.sdk.kotlin", name = "sqs" }
 
+# Testing
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
+
 [plugins]
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
@@ -96,4 +110,10 @@ logging = [
 postgres = [
     "postgresql-driver",
     "hikari",
+]
+
+test = [
+    "junit-jupiter",
+    "mockk",
+    "kotlinx-coroutines-test"
 ]

@@ -8,11 +8,10 @@ plugins {
 dependencies {
     implementation(libs.bundles.ktor.server)
     implementation(libs.bundles.logging)
-    implementation(libs.ktor.serialization.kotlinx.json)
 
     // Core OpenAPI support
-    implementation("io.ktor:ktor-server-openapi:3.3.3")
-    implementation("io.ktor:ktor-server-swagger:3.3.3")
+    implementation(libs.ktor.server.openapi)
+    implementation(libs.ktor.server.swagger)
 
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.core)
