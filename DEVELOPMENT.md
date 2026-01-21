@@ -54,7 +54,9 @@ The `Makefile` provides several commands to streamline development. Run `make he
 
 ### Testing & Building
 
-- **Test:** `make test` - Execute unit and integration tests (using Kotest)
+- **Test:** `make test` - Execute unit tests only
+- **Integration Test:** `./gradlew :modules:domain:integrationTest` - Execute integration tests against Postgres testcontainer
+- **All Tests:** `./gradlew test integrationTest` - Run both unit and integration tests
 - **Build:** `make build-all` - Run a full build (compile, check, test)
 - **Refresh Dependencies:** `make refresh` - Force Gradle to refresh dependencies
 - **Clean:** `make gradle-clean` - Clean Gradle build artifacts
@@ -73,6 +75,13 @@ The `Makefile` provides several commands to streamline development. Run `make he
 - **Repair migrations:** `make migrate-repair` - Repair Flyway schema history table (use if corrupted)
 
 See `resources/db/README.md` for detailed migration documentation.
+
+### Code Generation
+
+- **Generate jOOQ classes:** `make generate-jooq` - Generate jOOQ classes from database schema using testcontainer (requires Docker)
+  - This command starts a Postgres testcontainer, runs migrations, and generates jOOQ classes
+  - Useful when database schema changes and you need to regenerate type-safe database access code
+  - Note: Docker must be running for this command to work
 
 ### LocalStack (AWS Local Development)
 
@@ -127,6 +136,113 @@ Configuration is managed through environment variables and `.env` files:
 3. Environment variables - Can override any setting
 
 The application automatically loads `.env.local` and `.env` files on startup. See `modules/core/src/main/kotlin/com/github/cgund98/template/core/config/AppConfig.kt` for all available configuration options.
+
+## Testing Strategies
+
+This project uses two complementary testing strategies to ensure code quality and reliability:
+
+### 1. Unit Tests (`test` source set)
+
+**Location:** `modules/*/src/test/kotlin/`
+
+**Purpose:** Fast, isolated tests that verify business logic without external dependencies.
+
+**Characteristics:**
+- **Fast execution** - No database or network calls
+- **Isolated** - Each test is independent with mocked dependencies
+- **Comprehensive coverage** - Test edge cases, validation logic, and business rules
+- **Uses mocks** - Dependencies are mocked using MockK
+
+**When to use:**
+- Testing business logic in services
+- Testing validation rules
+- Testing domain model behavior
+- Testing error handling and edge cases
+
+**Example:**
+```kotlin
+// modules/domain/src/test/kotlin/.../UserServiceTest.kt
+class UserServiceTest : FunSpec() {
+    val userRepository = mockk<UserRepository>()
+    val eventPublisher = mockk<EventPublisher>()
+    // ... test business logic with mocked dependencies
+}
+```
+
+**Running unit tests:**
+```bash
+./gradlew test
+```
+
+### 2. Integration Tests (`integrationTest` source set)
+
+**Location:** `modules/*/src/integrationTest/kotlin/`
+
+**Purpose:** End-to-end tests that verify the system works with real database interactions.
+
+**Characteristics:**
+- **Real database** - Uses Postgres testcontainer for actual database operations
+- **Full stack** - Tests the complete flow from service to repository to database
+- **Real migrations** - Runs actual Flyway migrations against testcontainer
+- **Isolated per test** - Database is cleaned between tests for isolation
+
+**When to use:**
+- Testing repository implementations (jOOQ queries)
+- Testing transaction behavior
+- Testing database constraints and relationships
+- Verifying end-to-end CRUD operations
+- Testing complex queries and pagination
+
+**Example:**
+```kotlin
+// modules/domain/src/integrationTest/kotlin/.../UserServiceIntegrationTest.kt
+class UserServiceIntegrationTest : FunSpec(), KoinTest {
+    override suspend fun beforeSpec(spec: Spec) {
+        stopKoin = setupTestKoin() // Sets up testcontainer + Koin
+    }
+    // ... test against real Postgres database
+}
+```
+
+**Running integration tests:**
+```bash
+./gradlew :modules:domain:integrationTest
+```
+
+**Requirements:**
+- Docker must be running (for testcontainers)
+- Tests automatically start/stop Postgres container
+
+### Test Configuration
+
+**Unit Tests:**
+- Source set: `test`
+- Task: `test`
+- Dependencies: MockK, Kotest
+- Runs by default with `./gradlew test`
+
+**Integration Tests:**
+- Source set: `integrationTest`
+- Task: `integrationTest`
+- Dependencies: Testcontainers, Flyway, Koin Test
+- Must be explicitly run: `./gradlew integrationTest`
+- Does NOT run with `./gradlew test` (by design)
+
+### CI/CD Integration
+
+Both test strategies run in CI:
+- **Unit tests** run in the `test` job
+- **Integration tests** run in the `integrationTest` job (requires Docker)
+
+See `.github/workflows/ci.yml` for the complete CI configuration.
+
+### Best Practices
+
+1. **Write unit tests first** - They're faster and catch logic errors early
+2. **Use integration tests sparingly** - Focus on critical paths and repository implementations
+3. **Keep tests isolated** - Each test should be independent and not rely on execution order
+4. **Clean database state** - Integration tests clean the database between tests
+5. **Mock external services** - Even in integration tests, mock AWS services (SNS/SQS)
 
 ## Architecture Overview
 

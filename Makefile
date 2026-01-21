@@ -2,7 +2,7 @@
 SERVICE_NAME = workspace
 EXEC = docker compose exec -it $(SERVICE_NAME)
 
-.PHONY: help workspace-build workspace-up workspace-down workspace-shell shell lint fix test build-all refresh gradle-watch gradle-clean run-api run-worker migrate migrate-info migrate-repair localstack-up localstack-setup localstack-down localstack-logs build-docker
+.PHONY: help workspace-build workspace-up workspace-down workspace-shell shell lint fix test build-all refresh gradle-watch gradle-clean run-api run-worker migrate migrate-info migrate-repair localstack-up localstack-setup localstack-down localstack-logs build-docker generate-jooq
 
 help: ## Show this help
 	@echo "See DEVELOPMENT.md for more details."
@@ -34,8 +34,11 @@ fix: ## Automatically fix formatting
 	$(EXEC) ktlint -F --relative "**/*.kt" "**/*.kts" "!**/bin/**" "!**/build/**"
 
 # Testing
-test: ## Run tests (unit + integration)
+test: ## Run tests (unit)
 	./gradlew test
+
+integration-test: ## Run integration tests
+	./gradlew :modules:domain:integrationTest
 
 # Build
 build-all: ## Run a full build (compilation + check + test)
@@ -66,6 +69,12 @@ migrate-info: ## Show migration status
 
 migrate-repair: ## Repair Flyway schema history table (use if migrations are corrupted)
 	./gradlew :modules:infrastructure:flywayRepair
+
+# Code generation
+generate-jooq: ## Generate jOOQ classes from database schema (requires Docker)
+	@echo "Generating jOOQ classes from database schema..."
+	@echo "Note: This requires Docker to be running for the testcontainer."
+	./gradlew :modules:infrastructure:generateJooqFromTestcontainer
 
 # LocalStack commands
 localstack-up: ## Start LocalStack and wait for it to be ready

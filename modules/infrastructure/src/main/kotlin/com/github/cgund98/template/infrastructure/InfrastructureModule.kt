@@ -89,28 +89,36 @@ private fun SnsClient.Config.Builder.applyDefaults() {
         }
 }
 
-val infrastructureModule =
+/**
+ * Creates an infrastructure module with the given database configuration.
+ * This allows tests to inject their own database configuration (e.g., from testcontainers).
+ */
+@Suppress("LongMethod")
+fun infrastructureModule(
+    databaseConfig: DatabaseConfig,
+    migrationsPath: String = System.getProperty("user.dir") + "/resources/db/migrations",
+): org.koin.core.module.Module =
     module {
         // Database
         single<DataSource> {
             val config =
                 HikariConfig().apply {
-                    jdbcUrl = AppConfig.data.postgres.url
+                    jdbcUrl = databaseConfig.url
                     driverClassName = "org.postgresql.Driver"
-                    username = AppConfig.data.postgres.user
-                    password = AppConfig.data.postgres.password
+                    username = databaseConfig.user
+                    password = databaseConfig.password
 
                     // --- Tuning Parameters ---
 
                     // The most important setting: How many connections to keep open.
                     // Rule of thumb: (2 * CPU cores) + effective_spindle_count
-                    maximumPoolSize = AppConfig.data.postgres.maxPoolSize
+                    maximumPoolSize = databaseConfig.maxPoolSize
 
                     // How long to wait for a connection from the pool before throwing an error
-                    connectionTimeout = AppConfig.data.postgres.connectionTimeout // 30 seconds
+                    connectionTimeout = databaseConfig.connectionTimeout // 30 seconds
 
                     // Helps find "leaked" transactions (connections held too long)
-                    leakDetectionThreshold = AppConfig.data.postgres.leakDetectionThreshold // 2 seconds
+                    leakDetectionThreshold = databaseConfig.leakDetectionThreshold // 2 seconds
 
                     // Recommended for Postgres performance
                     addDataSourceProperty("cachePrepStmts", "true")
@@ -145,8 +153,6 @@ val infrastructureModule =
         // Flyway migrator
         single<FlywayMigrator> {
             val dataSource: DataSource = get()
-            // Get migrations path relative to project root
-            val migrationsPath = System.getProperty("user.dir") + "/resources/db/migrations"
             FlywayMigrator(dataSource, migrationsPath)
         }
 
@@ -184,3 +190,19 @@ val infrastructureModule =
             )
         }
     }
+
+/**
+ * Convenience infrastructure module that uses AppConfig for production.
+ */
+val infrastructureModule =
+    infrastructureModule(
+        databaseConfig =
+            DatabaseConfig(
+                url = AppConfig.data.postgres.url,
+                user = AppConfig.data.postgres.user,
+                password = AppConfig.data.postgres.password,
+                maxPoolSize = AppConfig.data.postgres.maxPoolSize,
+                connectionTimeout = AppConfig.data.postgres.connectionTimeout,
+                leakDetectionThreshold = AppConfig.data.postgres.leakDetectionThreshold,
+            ),
+    )
