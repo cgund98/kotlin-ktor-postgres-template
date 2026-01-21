@@ -46,8 +46,6 @@ fun main() {
 
     val logger = KotlinLogging.logger {}
 
-    logger.info { "Topic arn: ${AppConfig.data.events}" }
-
     logger.info { "Running migrations" }
 
     runMigrations()
