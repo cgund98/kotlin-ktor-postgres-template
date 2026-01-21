@@ -2,12 +2,16 @@
 # https://docs.gradle.org/current/userguide/version_catalogs.html#sec::toml-dependencies-format
 
 [versions]
-kotlin = "2.1.0"
+kotlin = "2.2.20"
 kotlinx-serialization-json = "1.7.3"
 kotlinx-coroutines = "1.10.2"
 kotlinx-datetime = "0.4.1"
 ktor = "3.3.3"
 exposed = "1.0.0-rc-3"
+jooq = "3.20.10"
+flyway = "11.1.0"
+testcontainers = "1.20.4"
+studer-jooq = "10.2"
 koin-bom = "4.1.1"
 postgresql = "42.7.4"
 aws-sdk-kotlin = "1.5.122"
@@ -45,6 +49,18 @@ exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "e
 exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
 exposed-datetime = { module = "org.jetbrains.exposed:exposed-kotlin-datetime", version.ref = "exposed" }
 
+# jOOQ - database interactions
+jooq = { module = "org.jooq:jooq", version.ref = "jooq" }
+jooq-codegen = { module = "org.jooq:jooq-codegen", version.ref = "jooq" }
+jooq-meta = { module = "org.jooq:jooq-meta", version.ref = "jooq" }
+
+# Flyway - database migrations
+flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
+flyway-database-postgresql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
+
+# Testcontainers
+testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainers" }
+
 # Koin
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
 koin-core = { module = "io.insert-koin:koin-core" }
@@ -73,6 +89,8 @@ junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "jun
 
 [plugins]
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+flyway = { id = "org.flywaydb.flyway", version.ref = "flyway" }
+studer-jooq = { id = "nu.studer.jooq", version.ref = "studer-jooq" }
 
 [bundles]
 # Group them so you only have to add one line to your build file

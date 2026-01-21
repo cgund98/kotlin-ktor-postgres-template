@@ -32,7 +32,7 @@ This template provides a solid foundation for building production-ready Kotlin a
 - **RESTful API Server** - Built with Ktor, featuring OpenAPI documentation, request validation, and comprehensive error handling
 - **Event Consumer Worker** - Asynchronous message processing using AWS SQS for event-driven architecture
 - **Clean 3-Tier Architecture** - Strict separation of concerns with Presentation, Domain, and Infrastructure layers
-- **Database Migrations** - Version-controlled database schema migrations using migrate
+- **Database Migrations** - Version-controlled database schema migrations using Flyway
 - **Configuration Management** - Support for `.env` files and environment variables for flexible deployment
 
 ## Why Kotlin?
@@ -71,7 +71,7 @@ This template uses Kotlin for several compelling reasons:
 - **PostgreSQL** - Relational database
 - **Exposed** - Type-safe SQL framework
 - **HikariCP** - High-performance JDBC connection pool
-- **migrate** - Database migration tool
+- **Flyway** - Database migration tool
 
 ### AWS Services
 - **AWS SDK Kotlin** - Official AWS SDK for Kotlin
@@ -190,11 +190,9 @@ resources/
 │   └── migrations/          # Database migration files (.up.sql, .down.sql)
 ├── docker/
 │   ├── workspace.Dockerfile # Development workspace container
-│   └── migrate.Dockerfile   # Migration tool container
 └── scripts/
     ├── awslocal.sh          # AWS CLI wrapper for LocalStack
     ├── localstack_setup.sh  # LocalStack resource setup
-    └── migrate.sh           # Migration helper script
 ```
 
 ## Quick Start

@@ -9,7 +9,6 @@ dependencies {
     implementation(libs.koin.ktor)
 
     implementation(libs.bundles.ktor.server)
-    implementation(libs.bundles.exposed)
     implementation(libs.bundles.logging)
 
     // Also add your internal domain module so the API can use your business logic

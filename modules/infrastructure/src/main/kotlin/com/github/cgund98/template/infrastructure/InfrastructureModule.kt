@@ -6,20 +6,29 @@ import aws.sdk.kotlin.services.sqs.SqsClient
 import aws.smithy.kotlin.runtime.net.url.Url
 import aws.smithy.kotlin.runtime.retries.StandardRetryStrategy
 import com.github.cgund98.template.core.config.AppConfig
+import com.github.cgund98.template.infrastructure.db.FlywayMigrator
 import com.github.cgund98.template.infrastructure.db.TransactionManager
 import com.github.cgund98.template.infrastructure.events.publisher.EventPublisher
 import com.github.cgund98.template.infrastructure.events.publisher.SnsEventPublisher
 import com.github.cgund98.template.infrastructure.events.serializer.EventSerializer
 import com.github.cgund98.template.infrastructure.events.serializer.JsonEventSerializer
-import com.github.cgund98.template.infrastructure.exposed.ExposedTransactionManager
+import com.github.cgund98.template.infrastructure.jooq.JooqTransactionManager
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import org.jetbrains.exposed.v1.jdbc.Database
+import org.jooq.DSLContext
+import org.jooq.SQLDialect
+import org.jooq.conf.Settings
+import org.jooq.impl.DSL
+import org.jooq.impl.DataSourceConnectionProvider
+import org.jooq.impl.DefaultConfiguration
+import org.jooq.impl.ThreadLocalTransactionProvider
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
+import javax.sql.DataSource
 import kotlin.time.Duration.Companion.seconds
 
 val localstackCredentials =
@@ -33,12 +42,15 @@ val localstackCredentials =
  * We use a context parameter (or just two extensions) to keep it DRY.
  */
 private fun SqsClient.Config.Builder.applyDefaults() {
+    var logger = KotlinLogging.logger { }
+
     region = AppConfig.data.aws.region
     endpointUrl =
         AppConfig.data.aws.endpoint
             ?.let { Url.parse(it) }
 
     if (AppConfig.data.aws.useLocalstack) {
+        logger.info { "Using localstack for SQS" }
         credentialsProvider = localstackCredentials
     }
 
@@ -53,12 +65,15 @@ private fun SqsClient.Config.Builder.applyDefaults() {
 const val SNS_MAX_RETRIES = 3
 
 private fun SnsClient.Config.Builder.applyDefaults() {
+    var logger = KotlinLogging.logger { }
+
     region = AppConfig.data.aws.region
     endpointUrl =
         AppConfig.data.aws.endpoint
             ?.let { Url.parse(it) }
 
     if (AppConfig.data.aws.useLocalstack) {
+        logger.info { "Using localstack for SNS" }
         credentialsProvider = localstackCredentials
     }
 
@@ -77,7 +92,7 @@ private fun SnsClient.Config.Builder.applyDefaults() {
 val infrastructureModule =
     module {
         // Database
-        single<Database> {
+        single<DataSource> {
             val config =
                 HikariConfig().apply {
                     jdbcUrl = AppConfig.data.postgres.url
@@ -104,11 +119,36 @@ val infrastructureModule =
 
             val dataSource = HikariDataSource(config)
 
-            // Pass the dataSource object instead of the URL string
-            Database.connect(dataSource)
+            dataSource
         }
 
-        singleOf(::ExposedTransactionManager) { bind<TransactionManager>() }
+        single<DSLContext> {
+            val dataSource: DataSource = get()
+
+            val connectionProvider = DataSourceConnectionProvider(dataSource)
+            val transactionProvider = ThreadLocalTransactionProvider(connectionProvider)
+
+            val settings = Settings()
+
+            val configuration =
+                DefaultConfiguration()
+                    .set(SQLDialect.POSTGRES)
+                    .set(connectionProvider)
+                    .set(transactionProvider)
+                    .set(settings)
+
+            DSL.using(configuration)
+        }
+
+        singleOf(::JooqTransactionManager) { bind<TransactionManager>() }
+
+        // Flyway migrator
+        single<FlywayMigrator> {
+            val dataSource: DataSource = get()
+            // Get migrations path relative to project root
+            val migrationsPath = System.getProperty("user.dir") + "/resources/db/migrations"
+            FlywayMigrator(dataSource, migrationsPath)
+        }
 
         // AWS
         single<SqsClient> {

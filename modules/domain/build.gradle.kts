@@ -3,8 +3,6 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.bundles.exposed)
-
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.core)
     implementation(libs.koin.ktor)
@@ -12,6 +10,12 @@ dependencies {
 
     implementation(project(":modules:infrastructure"))
     api(libs.kotlinx.datetime)
+
+    // jOOQ is used directly in domain module (JooqUserRepository)
+    implementation(libs.jooq)
+
+    // Coroutines for suspend functions in JooqUserRepository
+    implementation(libs.kotlinx.coroutines.core)
 
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)

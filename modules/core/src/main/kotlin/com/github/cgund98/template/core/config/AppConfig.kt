@@ -43,8 +43,8 @@ object AppConfig {
                     url = vars["POSTGRES_URL"] ?: "",
                     user = vars["POSTGRES_USER"] ?: "",
                     password = vars["POSTGRES_PASSWORD"] ?: "",
-                    maxPoolSize = vars["POSTGRES_MAX_POOL_SIZE"]?.toInt() ?: 25,
-                    connectionTimeout = vars["POSTGRES_CONNECTION_TIMEOUT"]?.toLong() ?: 30000,
+                    maxPoolSize = vars["POSTGRES_MAX_POOL_SIZE"]?.toInt() ?: 10,
+                    connectionTimeout = vars["POSTGRES_CONNECTION_TIMEOUT"]?.toLong() ?: 25000,
                     leakDetectionThreshold =
                         vars["POSTGRES_LEAK_DETECTION_THRESHOLD"]?.toLong() ?: 2000,
                 ),

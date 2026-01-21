@@ -7,6 +7,7 @@ import com.github.cgund98.template.domain.user.repo.UserEntity
 import com.github.cgund98.template.domain.user.repo.UserRepository
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -14,10 +15,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import java.util.UUID
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalTime::class)
 class UserValidatorTest {
     private val userRepository = mockk<UserRepository>()
     private val userValidator = UserValidator(userRepository)

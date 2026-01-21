@@ -75,13 +75,31 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+      - name: Build application artifacts
+        run: ./gradlew :modules:app-api:installDist :modules:app-worker:installDist :modules:presentation:buildOpenApi --no-daemon
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Build production Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./resources/docker/app.Dockerfile
+          file: ./resources/docker/app-runtime.Dockerfile
           push: false
           tags: kotlin-ktor-postgres-template-app:latest
           cache-from: type=gha
