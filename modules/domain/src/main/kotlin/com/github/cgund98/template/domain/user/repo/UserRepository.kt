@@ -17,20 +17,20 @@ data class UpdateUserParams(
 
 interface UserRepository {
     // Basic CRUD
-    fun create(params: CreateUserParams): UserEntity
+    suspend fun create(params: CreateUserParams): UserEntity
 
-    fun findById(id: UUID): UserEntity?
+    suspend fun findById(id: UUID): UserEntity?
 
-    fun findByEmail(email: String): UserEntity?
+    suspend fun findByEmail(email: String): UserEntity?
 
-    fun update(params: UpdateUserParams): UserEntity
+    suspend fun update(params: UpdateUserParams): UserEntity
 
-    fun delete(id: UUID): Boolean
+    suspend fun delete(id: UUID): Boolean
 
     // Querying
-    fun count(filter: UserFilter = UserFilter.Empty): Long
+    suspend fun count(filter: UserFilter = UserFilter.Empty): Long
 
-    fun list(
+    suspend fun list(
         limit: Int,
         offset: Long,
         filter: UserFilter = UserFilter.Empty,

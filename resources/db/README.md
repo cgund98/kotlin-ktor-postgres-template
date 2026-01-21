@@ -1,32 +1,18 @@
 # Database Migrations
 
-This directory contains database migrations managed by [golang-migrate](https://github.com/golang-migrate/migrate).
+This directory contains database migrations managed by [Flyway](https://flywaydb.org/).
 
 ## Prerequisites
 
-Install golang-migrate CLI:
-
-**macOS:**
-```bash
-brew install golang-migrate
-```
-
-**Linux:**
-```bash
-# Download from releases page or use package manager
-# See: https://github.com/golang-migrate/migrate/blob/master/database/postgres/TUTORIAL.md
-```
-
-**Verify installation:**
-```bash
-migrate -version
-```
+Flyway is integrated into the Gradle build, so no separate installation is required. Migrations run automatically via Gradle tasks.
 
 ## Migration Files
 
-Migrations are stored in the `migrations/` directory and follow the naming convention:
-- `{version}_{name}.up.sql` - Migration to apply
-- `{version}_{name}.down.sql` - Migration to rollback
+Migrations are stored in the `migrations/` directory and follow Flyway's naming convention:
+- `V{version}__{description}.sql` - Versioned migrations (e.g., `V1__initial_schema.sql`)
+- `R__{description}.sql` - Repeatable migrations (run every time checksums change)
+
+**Important:** Flyway uses versioned migrations that only run once. Unlike golang-migrate, Flyway does not use separate `.up.sql` and `.down.sql` files. Rollbacks are handled by creating new migrations that reverse changes.
 
 ## Usage
 
@@ -36,101 +22,100 @@ Migrations are stored in the `migrations/` directory and follow the naming conve
 # Apply all pending migrations
 make migrate
 
-# Rollback the last migration
-make migrate-down
+# Show migration status and history
+make migrate-info
 
-# Show current migration version
-make migrate-version
-
-# Create a new migration
-make migrate-create NAME=add_user_preferences
-
-# Force set migration version (use with caution)
-make migrate-force VERSION=1
-
-# Run migrations using Docker
-make migrate-docker
+# Repair Flyway schema history table (use if migrations are corrupted)
+make migrate-repair
 ```
 
-### Using Docker Compose
-
-The migrations are packaged in a Docker image (`app-migrations:latest`) that contains all migration files.
+### Using Gradle Directly
 
 ```bash
-# Build the migrations image (includes all migration files)
-make build-migrations
+# Apply all pending migrations
+./gradlew :modules:infrastructure:flywayMigrate
 
-# Run migrations using Docker Compose
-make migrate-docker
-# or
-docker-compose run --rm migrate
+# Show migration status
+./gradlew :modules:infrastructure:flywayInfo
 
-# Run specific migration commands
-make migrate-docker-up      # Apply migrations
-make migrate-docker-down    # Rollback migrations
-make migrate-docker-version # Show current version
+# Repair schema history table
+./gradlew :modules:infrastructure:flywayRepair
+
+# Validate migrations (check for changes)
+./gradlew :modules:infrastructure:flywayValidate
+
+# Clean database (removes all objects - use with caution!)
+./gradlew :modules:infrastructure:flywayClean
 ```
 
-### Using the Script Directly
+### Environment Variables
 
-```bash
-# Apply migrations
-./resources/scripts/migrate.sh up
-
-# Rollback last migration
-./resources/scripts/migrate.sh down
-
-# Show version
-./resources/scripts/migrate.sh version
-
-# Create new migration
-./resources/scripts/migrate.sh create my_migration_name
-
-# Migrate to specific version
-./resources/scripts/migrate.sh goto 2
-
-# Force version (use with caution)
-./resources/scripts/migrate.sh force 1
-```
-
-## Environment Variables
-
-The migration script uses the following environment variables (with defaults):
-
-- `POSTGRES_HOST` (default: `localhost`)
-- `POSTGRES_PORT` (default: `5432`)
+Flyway uses the following environment variables (with defaults for local development):
+- `POSTGRES_URL` (default: `jdbc:postgresql://localhost:5432/app`)
 - `POSTGRES_USER` (default: `postgres`)
 - `POSTGRES_PASSWORD` (default: `postgres`)
-- `POSTGRES_DB` (default: `app`)
-- `MIGRATIONS_PATH` (default: `./resources/db/migrations`)
+
+These can be set in `.env.local` or `.env` files, or as environment variables.
 
 ## Creating Migrations
 
 When creating a new migration:
 
-1. Use descriptive names that explain what the migration does
-2. Always provide both `.up.sql` and `.down.sql` files
-3. Test both up and down migrations
-4. Use transactions where possible (golang-migrate runs each migration in a transaction by default)
+1. **Use descriptive names** that explain what the migration does
+2. **Follow the naming convention**: `V{version}__{description}.sql`
+   - Version must be unique and incrementing (e.g., V1, V2, V3)
+   - Description should be in lowercase with underscores (e.g., `add_user_preferences`)
+3. **Test migrations** before committing
+4. **Use transactions** where possible (PostgreSQL supports DDL in transactions)
+5. **Use IF EXISTS/IF NOT EXISTS** to make migrations idempotent where appropriate
 
 Example:
-```bash
-make migrate-create NAME=add_user_preferences
+```sql
+-- File: V2__add_user_preferences.sql
+CREATE TABLE IF NOT EXISTS user_preferences (
+    user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    theme VARCHAR(20) NOT NULL DEFAULT 'light',
+    notifications_enabled BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 ```
-
-This creates:
-- `resources/db/migrations/000002_add_user_preferences.up.sql`
-- `resources/db/migrations/000002_add_user_preferences.down.sql`
 
 ## Migration Best Practices
 
-1. **Never modify existing migrations** - Create new migrations instead
-2. **Always test rollbacks** - Ensure `.down.sql` properly reverses changes
-3. **Use IF EXISTS/IF NOT EXISTS** - Makes migrations idempotent
-4. **Keep migrations small** - One logical change per migration
-5. **Document complex migrations** - Add comments explaining why
+1. **Never modify existing migrations** - Once a migration has been applied to a database, it should never be changed. Create new migrations instead.
+2. **Keep migrations small** - One logical change per migration makes it easier to understand and debug.
+3. **Test rollbacks** - While Flyway doesn't use `.down.sql` files, you should test that you can create new migrations to reverse changes if needed.
+4. **Use IF EXISTS/IF NOT EXISTS** - Makes migrations more resilient to partial failures.
+5. **Document complex migrations** - Add comments explaining why a migration is needed.
+6. **Version carefully** - Use sequential version numbers. Gaps are allowed, but avoid going backwards.
 
 ## Schema Versioning
 
-The migration tool automatically tracks the current schema version in a `schema_migrations` table. This table is created automatically on first migration run.
+Flyway automatically tracks the current schema version in a `flyway_schema_history` table. This table is created automatically on first migration run and contains:
+- Installed version numbers
+- Checksums of migration files
+- Execution timestamps
+- Success/failure status
 
+## Rollbacks
+
+Flyway does not support automatic rollbacks like golang-migrate's `.down.sql` files. To rollback a migration:
+
+1. **Create a new migration** that reverses the changes
+2. **Use Flyway's repair** if the schema history is corrupted
+3. **Manually fix** the database if needed (not recommended for production)
+
+Example rollback migration:
+```sql
+-- File: V3__remove_user_preferences.sql
+DROP TABLE IF EXISTS user_preferences;
+```
+
+## Differences from golang-migrate
+
+- **No separate up/down files**: Flyway uses single SQL files per migration
+- **Versioned migrations**: Migrations run once and are tracked by version number
+- **No automatic rollback**: Rollbacks require creating new migrations
+- **Gradle integration**: Migrations run via Gradle tasks, not a separate CLI tool
+- **Schema history table**: Uses `flyway_schema_history` instead of `schema_migrations`

@@ -11,10 +11,8 @@ services:
       - .:/workspace
       - gradle_cache:/home/workspace/.gradle # Cache gradle builds
     command: sleep infinity
-    ports:
-      - "8000:8000"
   postgres:
-    image: postgres:16
+    image: postgres:17
     container_name: kotlin-ktor-postgres-template-db
     environment:
       POSTGRES_USER: postgres
@@ -29,24 +27,9 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  migrate:
-    build:
-      context: .
-      dockerfile: resources/docker/migrate.Dockerfile
-    image: app-migrations:latest
-    container_name: kotlin-ktor-postgres-template-migrate
-    command: ["-path", "/migrations", "-database", "postgres://postgres:postgres@postgres:5432/app?sslmode=disable", "up"]
-    volumes:
-      # Mount migrations for local development (overrides image migrations)
-      - ./resources/db/migrations:/migrations
-    depends_on:
-      postgres:
-        condition: service_healthy
-    profiles:
-      - migrate
   localstack:
     image: localstack/localstack:latest
-    container_name: go-postgres-api-template-localstack
+    container_name: kotlin-ktor-postgres-template-localstack
     ports:
       - "4566:4566"
       - "4510-4559:4510-4559" # External services port range
@@ -64,11 +47,12 @@ services:
       timeout: 5s
       retries: 5
   # Production API service (for testing production Dockerfile)
+  # Note: Build artifacts on host first with: make build-all
   app-api:
     image: kotlin-ktor-postgres-template-prod:latest
     build:
       context: .
-      dockerfile: ./resources/docker/app.Dockerfile
+      dockerfile: ./resources/docker/app-runtime.Dockerfile
     container_name: kotlin-ktor-postgres-template-api
     command: ["sh", "-c", "cd /app/api && ./bin/app-api"]
     ports:
@@ -77,6 +61,7 @@ services:
       - .env.local
     environment:
       - LOG_FORMAT=JSON
+      - POSTGRES_URL=jdbc:postgresql://postgres:5432/app
     depends_on:
       postgres:
         condition: service_healthy
@@ -88,11 +73,12 @@ services:
       timeout: 5s
       retries: 3
   # Production Worker service (for testing production Dockerfile)
+  # Note: Build artifacts on host first with: make build-all
   app-worker:
     image: kotlin-ktor-postgres-template-prod:latest
     build:
       context: .
-      dockerfile: ./resources/docker/app.Dockerfile
+      dockerfile: ./resources/docker/app-runtime.Dockerfile
     container_name: kotlin-ktor-postgres-template-worker
     command: ["sh", "-c", "cd /app/worker && ./bin/app-worker"]
     env_file:

@@ -2,6 +2,7 @@ package com.github.cgund98.template.app.api
 
 import com.github.cgund98.template.core.config.AppConfig
 import com.github.cgund98.template.domain.user.userModule
+import com.github.cgund98.template.infrastructure.db.FlywayMigrator
 import com.github.cgund98.template.infrastructure.infrastructureModule
 import com.github.cgund98.template.presentation.installStatusPages
 import com.github.cgund98.template.presentation.user.userRoutes
@@ -18,15 +19,38 @@ import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
+import org.koin.core.context.startKoin
 import org.koin.ktor.plugin.Koin
+import org.koin.ktor.plugin.koin
+
+fun runMigrations() {
+    // Start coin app just with infra
+    val koinApp =
+        startKoin {
+            modules(
+                infrastructureModule,
+            )
+        }
+
+    // Run Flyway migrations on startup
+    val flywayMigrator: FlywayMigrator = koinApp.koin.get()
+    flywayMigrator.migrate()
+
+    // Close when done
+    koinApp.close()
+}
 
 fun main() {
-    System.setProperty("io.ktor.development", "true")
-
     // Parse .env files with logging
     AppConfig.readEnvFiles()
 
     val logger = KotlinLogging.logger {}
+
+    logger.info { "Topic arn: ${AppConfig.data.events}" }
+
+    logger.info { "Running migrations" }
+
+    runMigrations()
 
     logger.atInfo {
         message = "Starting webserver"
@@ -36,7 +60,6 @@ fun main() {
     embeddedServer(
         Netty,
         port = AppConfig.data.api.port,
-        watchPaths = listOf("classes"),
         module = Application::module,
     ).start(wait = true)
 }
@@ -48,6 +71,7 @@ suspend fun Application.module() {
             userModule,
         )
     }
+
     install(CallLogging) {
         disableDefaultColors()
     }

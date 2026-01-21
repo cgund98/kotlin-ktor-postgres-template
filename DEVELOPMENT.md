@@ -28,6 +28,8 @@ This document outlines the development workflow and commands available in the `M
    ```bash
    make migrate
    ```
+   
+   Note: Ensure PostgreSQL is running (`docker compose up -d postgres`) before running migrations.
 
 5. **Set up LocalStack (for event-driven features):**
    ```bash
@@ -48,11 +50,11 @@ The `Makefile` provides several commands to streamline development. Run `make he
 ### Code Quality
 
 - **Linting:** `make lint` - Run code quality checks using ktlint and detekt
-- **Formatting:** `make fix` - Automatically fix formatting issues (ktlint, detekt, and yamlfmt)
+- **Formatting:** `make fix` - Automatically fix formatting issues (ktlint and yamlfmt)
 
 ### Testing & Building
 
-- **Test:** `make test` - Execute unit and integration tests
+- **Test:** `make test` - Execute unit and integration tests (using Kotest)
 - **Build:** `make build-all` - Run a full build (compile, check, test)
 - **Refresh Dependencies:** `make refresh` - Force Gradle to refresh dependencies
 - **Clean:** `make gradle-clean` - Clean Gradle build artifacts
@@ -66,9 +68,9 @@ The `Makefile` provides several commands to streamline development. Run `make he
 
 ### Database Migrations
 
-- **Build migrations:** `make build-migrations` - Build the migration Docker image
-- **Run migrations:** `make migrate` or `make migrate-up` - Apply all pending database migrations
-- **Rollback:** `make migrate-down` - Rollback the last migration
+- **Run migrations:** `make migrate` - Apply all pending database migrations
+- **Migration status:** `make migrate-info` - Show current migration status and history
+- **Repair migrations:** `make migrate-repair` - Repair Flyway schema history table (use if corrupted)
 
 See `resources/db/README.md` for detailed migration documentation.
 
@@ -89,9 +91,9 @@ See `resources/db/README.md` for detailed migration documentation.
   - `infrastructure/` - Infrastructure layer (database, AWS, events)
   - `presentation/` - Presentation layer (API routes and DTOs)
 - `resources/` - Non-code assets
-  - `db/migrations/` - Database migration files
+  - `db/migrations/` - Database migration files (Flyway format)
   - `docker/` - Dockerfile definitions
-  - `scripts/` - Utility scripts for AWS LocalStack and migrations
+  - `scripts/` - Utility scripts for AWS LocalStack
 - `buildSrc/` - Gradle build logic and conventions
 - `gradle/` - Gradle wrapper and version catalogs
 
@@ -148,7 +150,8 @@ See the [README.md](./README.md) for detailed architecture documentation.
 
 - Ensure PostgreSQL is running: `docker compose ps postgres`
 - Check database health: `docker compose logs postgres`
-- Verify migrations have run: `make migrate`
+- Verify migrations have run: `make migrate-info` or `make migrate`
+- Check Flyway schema history: `make migrate-info` shows applied migrations
 
 ### LocalStack Issues
 

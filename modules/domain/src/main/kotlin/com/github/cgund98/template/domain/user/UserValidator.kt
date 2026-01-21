@@ -52,7 +52,7 @@ fun validateEmail(email: String?) {
 class UserValidator(
     private val userRepository: UserRepository,
 ) {
-    fun validateEmailNotDuplicate(
+    suspend fun validateEmailNotDuplicate(
         email: String?,
         currentEmail: String,
     ) {
@@ -70,7 +70,7 @@ class UserValidator(
      * Higher level compositions
      */
 
-    fun validateCreateUser(
+    suspend fun validateCreateUser(
         email: String,
         name: String,
         age: Int?,
@@ -81,7 +81,7 @@ class UserValidator(
         validateEmailNotDuplicate(email, currentEmail = "")
     }
 
-    fun validateUpdateUser(
+    suspend fun validateUpdateUser(
         id: UUID,
         email: String?,
         name: String?,
@@ -96,7 +96,7 @@ class UserValidator(
         validateEmailNotDuplicate(email, currentEmail = user.email)
     }
 
-    fun validateDeleteUser(id: UUID) {
+    suspend fun validateDeleteUser(id: UUID) {
         userRepository.findById(id) ?: throw NotFoundException("User", id.toString())
     }
 }

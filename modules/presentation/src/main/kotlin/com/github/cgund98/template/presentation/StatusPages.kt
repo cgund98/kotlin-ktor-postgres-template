@@ -73,7 +73,8 @@ private fun StatusPagesConfig.configureSystemExceptions() {
                 mapOf(
                     "uri" to call.request.local.uri,
                     "method" to call.request.httpMethod.value,
-                    "exception" to (cause::class.simpleName ?: "Unknown"),
+                    "exception" to (cause::class.qualifiedName ?: "Unknown"),
+                    "exceptionMessage" to cause.message,
                     "userAgent" to (call.request.headers["User-Agent"] ?: "unknown"),
                 )
         }

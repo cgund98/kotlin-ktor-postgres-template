@@ -1,6 +1,5 @@
 plugins {
     id("buildlogic.kotlin-library-conventions")
-    id("buildlogic.linting-conventions")
     id("io.ktor.plugin") version "3.3.3"
     alias(libs.plugins.kotlin.serialization)
 }
@@ -21,6 +20,7 @@ dependencies {
     implementation(project(":modules:infrastructure"))
 }
 
+// OpenAPI generation is experimental and can cause compiler compatibility issues.
 ktor {
     @OptIn(io.ktor.plugin.OpenApiPreview::class)
     openApi {
@@ -35,5 +35,9 @@ ktor {
 
 // This ensures the JSON is generated before resources are packaged
 tasks.processResources {
-    dependsOn("buildOpenApi")
+    // OpenAPI generation is experimental and tightly coupled to Kotlin compiler internals.
+    // Keep it opt-in so normal builds/tests don't fail due to version mismatches.
+    if (project.hasProperty("generateOpenApi")) {
+        dependsOn("buildOpenApi")
+    }
 }

@@ -1,9 +1,8 @@
 # Variables
 SERVICE_NAME = workspace
 EXEC = docker compose exec -it $(SERVICE_NAME)
-MIGRATE_DB_URL = postgres://postgres:postgres@postgres:5432/app?sslmode=disable
 
-.PHONY: help workspace-build workspace-up workspace-down workspace-shell shell lint fix test build-all refresh gradle-watch gradle-clean run-api run-worker build-migrations migrate migrate-up migrate-down localstack-up localstack-setup localstack-down localstack-logs
+.PHONY: help workspace-build workspace-up workspace-down workspace-shell shell lint fix test build-all refresh gradle-watch gradle-clean run-api run-worker migrate migrate-info migrate-repair localstack-up localstack-setup localstack-down localstack-logs build-docker
 
 help: ## Show this help
 	@echo "See DEVELOPMENT.md for more details."
@@ -25,51 +24,48 @@ workspace-shell: ## Open a shell in the workspace container
 shell: workspace-shell ## Alias for workspace-shell
 
 # Linting and formatting
-lint: ## Run checkstyle/ktlint checks
-	$(EXEC) ./gradlew ktlintCheck detekt
+lint: ## Run checks
+	$(EXEC) yamlfmt -lint .
+	$(EXEC) ktlint --relative "**/*.kt" "**/*.kts" "!**/bin/**" "!**/build/**"
+	$(EXEC) detekt --input modules --excludes "**/bin/**,**/build/**" --config gradle-config/detekt.yml --build-upon-default-config --parallel --base-path .
 
-fix: ## Automatically fix Kotlin formatting
+fix: ## Automatically fix formatting
 	$(EXEC) yamlfmt .
-	$(EXEC) ./gradlew ktlintFormat
-	$(EXEC) ./gradlew detekt --auto-correct
+	$(EXEC) ktlint -F --relative "**/*.kt" "**/*.kts" "!**/bin/**" "!**/build/**"
 
 # Testing
 test: ## Run tests (unit + integration)
-	$(EXEC) ./gradlew test
+	./gradlew test
 
 # Build
 build-all: ## Run a full build (compilation + check + test)
-	$(EXEC) ./gradlew build
+	./gradlew build
 
 refresh: ## Force Gradle to refresh dependencies
-	$(EXEC) ./gradlew build --refresh-dependencies
+	./gradlew build --refresh-dependencies
 
 gradle-watch: ## Run Gradle in continuous mode to recompile on changes
-	$(EXEC) ./gradlew -t classes
+	./gradlew -t classes
 
 gradle-clean: ## Clean Gradle build artifacts
-	$(EXEC) ./gradlew clean
+	./gradlew clean
 
 # Run dev servers
 run-api: ## Run the API application
-	# OpenAPI generation sometimes breaks when you tweak a route
-	# So we run clean before we build as a workaround
-	$(EXEC) ./gradlew clean :modules:app-api:run
+	./gradlew -t clean :modules:app-api:run
 
 run-worker: ## Run the Worker application with continuous build
-	$(EXEC) ./gradlew -t :modules:app-worker:run
+	./gradlew -t :modules:app-worker:run
 
 # Migrations
-build-migrations: ## Build the migration Docker image
-	docker compose build migrate
+migrate: ## Run database migrations (apply all pending)
+	./gradlew :modules:infrastructure:flywayMigrate
 
-migrate: build-migrations ## Run database migrations (up)
-	docker compose run --rm migrate -path /migrations -database "$(MIGRATE_DB_URL)" up
+migrate-info: ## Show migration status
+	./gradlew :modules:infrastructure:flywayInfo
 
-migrate-up: migrate ## Alias for migrate
-
-migrate-down: build-migrations ## Rollback last migration
-	docker compose run --rm migrate -path /migrations -database "$(MIGRATE_DB_URL)" down
+migrate-repair: ## Repair Flyway schema history table (use if migrations are corrupted)
+	./gradlew :modules:infrastructure:flywayRepair
 
 # LocalStack commands
 localstack-up: ## Start LocalStack and wait for it to be ready
@@ -97,3 +93,15 @@ localstack-down: ## Stop LocalStack
 
 localstack-logs: ## Show LocalStack logs
 	docker compose logs -f localstack
+
+# Docker build commands
+build-docker: ## Build Docker image from pre-built artifacts (build artifacts first with: make build-all)
+	@echo "Building Docker image from pre-built artifacts..."
+	@if [ ! -d "modules/app-api/build/install/app-api" ] || [ ! -d "modules/app-worker/build/install/app-worker" ]; then \
+		echo "Error: Artifacts not found. Please run 'make build-all' first."; \
+		exit 1; \
+	fi
+	docker build -f resources/docker/app-runtime.Dockerfile -t kotlin-ktor-postgres-template-prod:latest .
+
+build-all: ## Build all artifacts (for Docker image)
+	./gradlew :modules:app-api:installDist :modules:app-worker:installDist :modules:presentation:buildOpenApi

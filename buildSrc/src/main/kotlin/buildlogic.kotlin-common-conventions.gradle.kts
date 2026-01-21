@@ -18,8 +18,11 @@ dependencies {
         implementation("org.apache.commons:commons-text:1.13.0")
     }
 
-    // Use JUnit Jupiter for testing.
-    testImplementation("org.junit.jupiter:junit-jupiter:5.12.1")
+    // Use Kotest for testing.
+    testImplementation(platform("io.kotest:kotest-bom:5.8.1"))
+    testImplementation("io.kotest:kotest-runner-junit5")
+    testImplementation("io.kotest:kotest-assertions-core")
+    testImplementation("io.kotest:kotest-property")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
@@ -32,15 +35,20 @@ java {
 }
 
 tasks.named<Test>("test") {
-    // Use JUnit Platform for unit tests.
+    // Use JUnit Platform for Kotest tests.
     useJUnitPlatform()
-    
+
     // Parallel test execution
-    maxParallelForks = Runtime.getRuntime().availableProcessors().div(2).coerceAtLeast(1)
-    
+    maxParallelForks =
+        Runtime
+            .getRuntime()
+            .availableProcessors()
+            .div(2)
+            .coerceAtLeast(1)
+
     // Fork a new JVM for each test class
     setForkEvery(100)
-    
+
     // Increase memory for tests
     minHeapSize = "128m"
     maxHeapSize = "512m"

@@ -2,28 +2,28 @@
 # https://docs.gradle.org/current/userguide/version_catalogs.html#sec::toml-dependencies-format
 
 [versions]
-kotlin = "2.1.0"
+kotlin = "2.2.20"
 kotlinx-serialization-json = "1.7.3"
-kotlin-gradle-plugin = "2.2.21"
 kotlinx-coroutines = "1.10.2"
 kotlinx-datetime = "0.4.1"
 ktor = "3.3.3"
 exposed = "1.0.0-rc-3"
+jooq = "3.20.10"
+flyway = "11.1.0"
+testcontainers = "1.20.4"
+studer-jooq = "10.2"
 koin-bom = "4.1.1"
 postgresql = "42.7.4"
 aws-sdk-kotlin = "1.5.122"
 
-detekt = "1.23.6"
-ktlint = "12.1.1"
-
 # Testing
 mockk = "1.13.12"
-kotlinx-coroutines-test = "1.7.3"
 junit-jupiter = "5.12.1"
+kotest = "5.8.1"
 
 
 [libraries]
-kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin-gradle-plugin" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 
 # Ktor Server
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
@@ -50,6 +50,18 @@ exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "e
 exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
 exposed-datetime = { module = "org.jetbrains.exposed:exposed-kotlin-datetime", version.ref = "exposed" }
 
+# jOOQ - database interactions
+jooq = { module = "org.jooq:jooq", version.ref = "jooq" }
+jooq-codegen = { module = "org.jooq:jooq-codegen", version.ref = "jooq" }
+jooq-meta = { module = "org.jooq:jooq-meta", version.ref = "jooq" }
+
+# Flyway - database migrations
+flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
+flyway-database-postgresql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
+
+# Testcontainers
+testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainers" }
+
 # Koin
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
 koin-core = { module = "io.insert-koin:koin-core" }
@@ -63,10 +75,6 @@ dotenv-kotlin = { module = "io.github.cdimascio:dotenv-kotlin", version = "6.4.1
 postgresql-driver = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 hikari = { module = "com.zaxxer:HikariCP", version = "6.2.1" }
 
-# Linters
-plugin-detekt = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
-plugin-ktlint = { module = "org.jlleitschuh.gradle:ktlint-gradle", version.ref = "ktlint" }
-
 # JSON
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 
@@ -77,11 +85,16 @@ aws-sqs = { group = "aws.sdk.kotlin", name = "sqs" }
 
 # Testing
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
-kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
+kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
+kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
 
 [plugins]
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+flyway = { id = "org.flywaydb.flyway", version.ref = "flyway" }
+studer-jooq = { id = "nu.studer.jooq", version.ref = "studer-jooq" }
 
 [bundles]
 # Group them so you only have to add one line to your build file
@@ -113,7 +126,9 @@ postgres = [
 ]
 
 test = [
-    "junit-jupiter",
+    "kotest-runner-junit5",
+    "kotest-assertions-core",
+    "kotest-property",
     "mockk",
     "kotlinx-coroutines-test"
 ]
