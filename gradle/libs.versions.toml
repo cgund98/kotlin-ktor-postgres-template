@@ -19,6 +19,7 @@ aws-sdk-kotlin = "1.5.122"
 # Testing
 mockk = "1.13.12"
 junit-jupiter = "5.12.1"
+kotest = "5.8.1"
 
 
 [libraries]
@@ -86,6 +87,9 @@ aws-sqs = { group = "aws.sdk.kotlin", name = "sqs" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
+kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
+kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
 
 [plugins]
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
@@ -122,7 +126,9 @@ postgres = [
 ]
 
 test = [
-    "junit-jupiter",
+    "kotest-runner-junit5",
+    "kotest-assertions-core",
+    "kotest-property",
     "mockk",
     "kotlinx-coroutines-test"
 ]
