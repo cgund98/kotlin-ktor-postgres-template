@@ -54,7 +54,7 @@ The `Makefile` provides several commands to streamline development. Run `make he
 
 ### Testing & Building
 
-- **Test:** `make test` - Execute unit and integration tests
+- **Test:** `make test` - Execute unit and integration tests (using Kotest)
 - **Build:** `make build-all` - Run a full build (compile, check, test)
 - **Refresh Dependencies:** `make refresh` - Force Gradle to refresh dependencies
 - **Clean:** `make gradle-clean` - Clean Gradle build artifacts

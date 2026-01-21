@@ -4,7 +4,7 @@
 
 **A production-ready Kotlin web API template demonstrating modern best practices for building scalable backend services**
 
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.1.0-blue.svg)](https://kotlinlang.org/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.2.20-blue.svg)](https://kotlinlang.org/)
 [![Ktor](https://img.shields.io/badge/Ktor-3.3.3-green.svg)](https://ktor.io/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16+-blue.svg)](https://www.postgresql.org/)
 [![Gradle](https://img.shields.io/badge/Gradle-9.3+-orange.svg)](https://gradle.org/)
@@ -69,7 +69,7 @@ This template uses Kotlin for several compelling reasons:
 
 ### Database
 - **PostgreSQL** - Relational database
-- **Exposed** - Type-safe SQL framework
+- **jOOQ** - Type-safe SQL DSL with code generation
 - **HikariCP** - High-performance JDBC connection pool
 - **Flyway** - Database migration tool
 
@@ -86,6 +86,11 @@ This template uses Kotlin for several compelling reasons:
 ### Logging & Observability
 - **Kotlin Logging** - Structured logging facade
 - **Logback** - Logging framework with Logstash encoder support
+
+### Testing
+- **Kotest** - Flexible testing framework for Kotlin
+- **MockK** - Mocking library for Kotlin
+- **Kotlinx Coroutines Test** - Testing utilities for coroutines
 
 ### Code Quality
 - **ktlint** - Kotlin code style checker
@@ -114,7 +119,7 @@ This application is designed with **clean 3-tier architecture** principles, ensu
    - Pure business rules with no external dependencies
 
 3. **Infrastructure Layer** (`modules/infrastructure/`)
-   - Database implementations (Exposed)
+   - Database implementations (jOOQ)
    - AWS integrations (SNS/SQS)
    - Event publishing and consumption
    - External service adapters
@@ -144,7 +149,7 @@ modules/
 │   │   ├── publisher/ # SNS event publisher
 │   │   ├── registry/  # Event type definitions
 │   │   └── serializer/ # Event serialization
-│   └── exposed/      # Exposed ORM integration
+│   └── jooq/         # jOOQ transaction management and context
 └── presentation/      # Presentation layer - API
     └── user/          # User API routes and DTOs
 ```
