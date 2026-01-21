@@ -4,7 +4,6 @@
 [versions]
 kotlin = "2.1.0"
 kotlinx-serialization-json = "1.7.3"
-kotlin-gradle-plugin = "2.2.21"
 kotlinx-coroutines = "1.10.2"
 kotlinx-datetime = "0.4.1"
 ktor = "3.3.3"
@@ -13,17 +12,13 @@ koin-bom = "4.1.1"
 postgresql = "42.7.4"
 aws-sdk-kotlin = "1.5.122"
 
-detekt = "1.23.6"
-ktlint = "12.1.1"
-
 # Testing
 mockk = "1.13.12"
-kotlinx-coroutines-test = "1.7.3"
 junit-jupiter = "5.12.1"
 
 
 [libraries]
-kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin-gradle-plugin" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 
 # Ktor Server
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
@@ -63,10 +58,6 @@ dotenv-kotlin = { module = "io.github.cdimascio:dotenv-kotlin", version = "6.4.1
 postgresql-driver = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 hikari = { module = "com.zaxxer:HikariCP", version = "6.2.1" }
 
-# Linters
-plugin-detekt = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
-plugin-ktlint = { module = "org.jlleitschuh.gradle:ktlint-gradle", version.ref = "ktlint" }
-
 # JSON
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 
@@ -77,7 +68,7 @@ aws-sqs = { group = "aws.sdk.kotlin", name = "sqs" }
 
 # Testing
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
-kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
 
 [plugins]

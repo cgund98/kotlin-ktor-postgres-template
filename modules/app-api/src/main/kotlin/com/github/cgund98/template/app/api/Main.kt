@@ -21,7 +21,6 @@ import io.ktor.server.routing.routing
 import org.koin.ktor.plugin.Koin
 
 fun main() {
-    System.setProperty("io.ktor.development", "true")
 
     // Parse .env files with logging
     AppConfig.readEnvFiles()
@@ -36,7 +35,6 @@ fun main() {
     embeddedServer(
         Netty,
         port = AppConfig.data.api.port,
-        watchPaths = listOf("classes"),
         module = Application::module,
     ).start(wait = true)
 }

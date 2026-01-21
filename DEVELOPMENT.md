@@ -48,7 +48,7 @@ The `Makefile` provides several commands to streamline development. Run `make he
 ### Code Quality
 
 - **Linting:** `make lint` - Run code quality checks using ktlint and detekt
-- **Formatting:** `make fix` - Automatically fix formatting issues (ktlint, detekt, and yamlfmt)
+- **Formatting:** `make fix` - Automatically fix formatting issues (ktlint and yamlfmt)
 
 ### Testing & Building
 

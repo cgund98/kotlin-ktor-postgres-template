@@ -58,7 +58,7 @@ This template uses Kotlin for several compelling reasons:
 - ✅ **OpenAPI Documentation** - Auto-generated API documentation available at `/docs`
 - ✅ **Database Migrations** - Version-controlled schema changes with rollback support
 - ✅ **Docker Development** - Complete Docker Compose setup for local development
-- ✅ **Code Quality** - Integrated linting (ktlint, detekt) and formatting tools
+- ✅ **Code Quality** - Linting (ktlint, detekt) and formatting tools
 
 ## Tech Stack
 

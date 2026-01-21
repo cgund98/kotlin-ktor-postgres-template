@@ -25,13 +25,14 @@ workspace-shell: ## Open a shell in the workspace container
 shell: workspace-shell ## Alias for workspace-shell
 
 # Linting and formatting
-lint: ## Run checkstyle/ktlint checks
-	$(EXEC) ./gradlew ktlintCheck detekt
+lint: ## Run checks
+	$(EXEC) yamlfmt -lint .
+	$(EXEC) ktlint --relative "**/*.kt" "**/*.kts" "!**/bin/**" "!**/build/**"
+	$(EXEC) detekt --input modules --excludes "**/bin/**,**/build/**" --config gradle-config/detekt.yml --build-upon-default-config --parallel --base-path .
 
-fix: ## Automatically fix Kotlin formatting
+fix: ## Automatically fix formatting
 	$(EXEC) yamlfmt .
-	$(EXEC) ./gradlew ktlintFormat
-	$(EXEC) ./gradlew detekt --auto-correct
+	$(EXEC) ktlint -F --relative "**/*.kt" "**/*.kts" "!**/bin/**" "!**/build/**"
 
 # Testing
 test: ## Run tests (unit + integration)
@@ -52,12 +53,10 @@ gradle-clean: ## Clean Gradle build artifacts
 
 # Run dev servers
 run-api: ## Run the API application
-	# OpenAPI generation sometimes breaks when you tweak a route
-	# So we run clean before we build as a workaround
-	$(EXEC) ./gradlew clean :modules:app-api:run
+	$(EXEC)  watchexec --force-poll 1000 -r -e kt -- ./gradlew --no-daemon clean :modules:app-api:run
 
 run-worker: ## Run the Worker application with continuous build
-	$(EXEC) ./gradlew -t :modules:app-worker:run
+	$(EXEC)  watchexec --force-poll 1000 -r -e kt -- ./gradlew --no-daemon :modules:app-worker:run
 
 # Migrations
 build-migrations: ## Build the migration Docker image

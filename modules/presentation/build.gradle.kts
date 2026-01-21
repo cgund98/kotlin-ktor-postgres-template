@@ -1,6 +1,5 @@
 plugins {
     id("buildlogic.kotlin-library-conventions")
-    id("buildlogic.linting-conventions")
     id("io.ktor.plugin") version "3.3.3"
     alias(libs.plugins.kotlin.serialization)
 }
