@@ -22,4 +22,4 @@ data class JooqContextElement(
  * Extension function to get the DSLContext from the current coroutine context.
  * Throws an error if not in a transaction context.
  */
-fun CoroutineContext.jooq(): DSLContext = get(JooqContextKey)?.dsl ?: error("No jOOQ context found!")
+fun CoroutineContext.jooq(): DSLContext? = get(JooqContextKey)?.dsl
