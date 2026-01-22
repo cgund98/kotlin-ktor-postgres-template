@@ -54,6 +54,7 @@ exposed-datetime = { module = "org.jetbrains.exposed:exposed-kotlin-datetime", v
 jooq = { module = "org.jooq:jooq", version.ref = "jooq" }
 jooq-codegen = { module = "org.jooq:jooq-codegen", version.ref = "jooq" }
 jooq-meta = { module = "org.jooq:jooq-meta", version.ref = "jooq" }
+jooq-kotlin-coroutines = { module = "org.jooq:jooq-kotlin-coroutines", version.ref = "jooq"}
 
 # Flyway - database migrations
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }

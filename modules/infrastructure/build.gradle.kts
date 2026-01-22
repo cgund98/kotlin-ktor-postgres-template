@@ -22,6 +22,7 @@ dependencies {
     implementation(libs.bundles.logging)
 
     api(libs.jooq)
+    implementation(libs.jooq.kotlin.coroutines)
 
     implementation(platform(libs.aws.bom))
     implementation(libs.aws.sns)
